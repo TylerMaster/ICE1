@@ -8,32 +8,27 @@ package exercise1;
  * @author dancye
  * @author Paul Bonenfant Jan 25, 2022 
  */
+import java.util.Random;
 public class CardTrick {
     
     public static void main(String[] args) {
         
         Card[] hand = new Card[7];
+        
+        Random random = new Random();
 
         for (int i = 0; i < hand.length; i++) {
+            int value = random.nextInt(13) + 1;
+            String suit = Card.SUITS[random.nextInt(4)];
             Card card = new Card();
-            //card.setValue(insert call to random number generator here)
-            // 
-            //card.setSuit(Card.SUITS[insert call to random number between 0-3 here])
-            // Hint: You can use Random -> random.nextInt(n) to get a random number between 0 and n-1 (inclusive)
-            //       Don't worry about duplicates at this point
+            hand[i] = card;
+         
         }
 
-        // insert code to ask the user for Card value and suit, create their card
-        // and search the hand here. 
-        // Hint: You can ask for values 1 to 10, and then
-        //       11 for jack, 12 for queen, etc. (remember arrays are 0-based though)
-        //       1 for Hearts, 2 for Diamonds, etc. (remember arrays are 0-based though)
-        // 
-        // Then loop through the cards in the array to see if there's a match.
-        
-        // If the guess is successful, invoke the printInfo() method below.
+       
         
     }
+    
 
     /**
      * A simple method to print out personal information. Follow the instructions to 
