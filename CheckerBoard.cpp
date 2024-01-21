@@ -47,13 +47,13 @@ void CheckerBoard::playGame() {
 	PlayerPiece xPiece7('X', false);
 	PlayerPiece xPiece8('X', false);
 	PlayerPiece xPiece9('X', false);
-	PlayerPiece xPiece10('X', true);
+	PlayerPiece xPiece10('X', false);
 	PlayerPiece xPiece11('X', false);
 	PlayerPiece xPiece12('X', false);
 
 	PlayerPiece2 oPiece1('O', false);
 	PlayerPiece2 oPiece2('O', false);
-	PlayerPiece2 oPiece3('O', true);
+	PlayerPiece2 oPiece3('O', false);
 	PlayerPiece2 oPiece4('O', false);
 	PlayerPiece2 oPiece5('O', false);
 	PlayerPiece2 oPiece6('O', false);
