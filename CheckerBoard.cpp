@@ -47,13 +47,13 @@ void CheckerBoard::playGame() {
 	PlayerPiece xPiece7('X', false);
 	PlayerPiece xPiece8('X', false);
 	PlayerPiece xPiece9('X', false);
-	PlayerPiece xPiece10('M', true);
+	PlayerPiece xPiece10('X', false);
 	PlayerPiece xPiece11('X', false);
 	PlayerPiece xPiece12('X', false);
 
 	PlayerPiece2 oPiece1('O', false);
 	PlayerPiece2 oPiece2('O', false);
-	PlayerPiece2 oPiece3('W', true);
+	PlayerPiece2 oPiece3('O', false);
 	PlayerPiece2 oPiece4('O', false);
 	PlayerPiece2 oPiece5('O', false);
 	PlayerPiece2 oPiece6('O', false);
@@ -226,19 +226,19 @@ void CheckerBoard::playerPieces(PlayerPiece xPiece1, PlayerPiece xPiece2, Player
 
 	board[0][2] = xPiece2.get_Symbol();
 
-	/*board[0][4] = xPiece3.get_Symbol();
+	board[0][4] = xPiece3.get_Symbol();
 
 	board[0][6] = xPiece4.get_Symbol();
 
-	board[1][1] = xPiece5.get_Symbol();*/
+	board[1][1] = xPiece5.get_Symbol();
 
 	board[1][3] = xPiece6.get_Symbol();
 
-	/*board[1][5] = xPiece7.get_Symbol();
+	board[1][5] = xPiece7.get_Symbol();
 
 	board[1][7] = xPiece8.get_Symbol();
 
-	board[2][0] = xPiece9.get_Symbol();*/
+	board[2][0] = xPiece9.get_Symbol();
 
 	board[2][2] = xPiece10.get_Symbol();
 
@@ -261,7 +261,7 @@ void CheckerBoard::playerPieces2(PlayerPiece2 oPiece1, PlayerPiece2 oPiece2, Pla
 
 	board[5][5] = oPiece3.get_Symbol();
 
-	/*board[5][7] = oPiece4.get_Symbol();
+	board[5][7] = oPiece4.get_Symbol();
 
 	board[6][0] = oPiece5.get_Symbol();
 
@@ -269,7 +269,7 @@ void CheckerBoard::playerPieces2(PlayerPiece2 oPiece1, PlayerPiece2 oPiece2, Pla
 
 	board[6][4] = oPiece7.get_Symbol();
 
-	board[6][6] = oPiece8.get_Symbol();*/
+	board[6][6] = oPiece8.get_Symbol();
 
 	board[7][1] = oPiece9.get_Symbol();
 
