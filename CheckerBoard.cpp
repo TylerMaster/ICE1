@@ -47,13 +47,13 @@ void CheckerBoard::playGame() {
 	PlayerPiece xPiece7('X', false);
 	PlayerPiece xPiece8('X', false);
 	PlayerPiece xPiece9('X', false);
-	PlayerPiece xPiece10('X', false);
+	PlayerPiece xPiece10('M', true);
 	PlayerPiece xPiece11('X', false);
 	PlayerPiece xPiece12('X', false);
 
 	PlayerPiece2 oPiece1('O', false);
 	PlayerPiece2 oPiece2('O', false);
-	PlayerPiece2 oPiece3('O', false);
+	PlayerPiece2 oPiece3('W', true);
 	PlayerPiece2 oPiece4('O', false);
 	PlayerPiece2 oPiece5('O', false);
 	PlayerPiece2 oPiece6('O', false);
@@ -76,7 +76,7 @@ void CheckerBoard::playGame() {
 
 	playerPieces2(oPiece1, oPiece2, oPiece3, oPiece4, oPiece5, oPiece6,
 		oPiece7, oPiece8, oPiece9, oPiece10, oPiece11, oPiece12);
-
+	
 	while (gameIsDone == false) {
 		printBoard();
 
@@ -226,19 +226,19 @@ void CheckerBoard::playerPieces(PlayerPiece xPiece1, PlayerPiece xPiece2, Player
 
 	board[0][2] = xPiece2.get_Symbol();
 
-	board[0][4] = xPiece3.get_Symbol();
+	/*board[0][4] = xPiece3.get_Symbol();
 
 	board[0][6] = xPiece4.get_Symbol();
 
-	board[1][1] = xPiece5.get_Symbol();
+	board[1][1] = xPiece5.get_Symbol();*/
 
 	board[1][3] = xPiece6.get_Symbol();
 
-	board[1][5] = xPiece7.get_Symbol();
+	/*board[1][5] = xPiece7.get_Symbol();
 
 	board[1][7] = xPiece8.get_Symbol();
 
-	board[2][0] = xPiece9.get_Symbol();
+	board[2][0] = xPiece9.get_Symbol();*/
 
 	board[2][2] = xPiece10.get_Symbol();
 
@@ -261,7 +261,7 @@ void CheckerBoard::playerPieces2(PlayerPiece2 oPiece1, PlayerPiece2 oPiece2, Pla
 
 	board[5][5] = oPiece3.get_Symbol();
 
-	board[5][7] = oPiece4.get_Symbol();
+	/*board[5][7] = oPiece4.get_Symbol();
 
 	board[6][0] = oPiece5.get_Symbol();
 
@@ -269,7 +269,7 @@ void CheckerBoard::playerPieces2(PlayerPiece2 oPiece1, PlayerPiece2 oPiece2, Pla
 
 	board[6][4] = oPiece7.get_Symbol();
 
-	board[6][6] = oPiece8.get_Symbol();
+	board[6][6] = oPiece8.get_Symbol();*/
 
 	board[7][1] = oPiece9.get_Symbol();
 
@@ -417,13 +417,199 @@ bool CheckerBoard::pieceMover(int x, int y, int x1, int y1, char currentPlayer, 
 	}
 
 
+
+	/*
+	if (((board[y][x] == 'M') && (board[y1][x1] == '*')) && ((y < y1) && (x < x1))) {
+		int distanceY;
+		int distanceX;
+		distanceY = y1 - y;
+		distanceX = x1 - x;
+		for (int i = 1; i < distanceX; i++) {
+			for (int j = 1; j < distanceY; j++) {
+
+
+
+				if ((board[y1 - j][x1 - i] != '*') && (i == j)) {
+					cout << "test1" << endl;
+					cout << i << endl;
+					cout << j << endl;
+					return false;
+					break;
+				}
+
+			}
+		}
+	}
+
+	if (((board[y][x] == 'M') && (board[y1][x1] == '*')) && ((y < y1) && (x > x1))) {
+		int distanceY;
+		int distanceX;
+		distanceY = y1 - y;
+		distanceX = x - x1;
+
+		for (int i = 1; i < distanceX; i++) {
+			for (int j = 1; j < distanceY; j++) {
+
+
+
+				if ((board[y1 - j][x1 + i] != '*') && (i == j)) {
+					cout << "test1" << endl;
+					cout << i << endl;
+					cout << j << endl;
+					return false;
+					break;
+				}
+
+			}
+		}
+
+
+
+	}
+
+	if (((board[y][x] == 'M') && (board[y1][x1] == '*')) && ((y > y1) && (x < x1))) {
+		int distanceY;
+		int distanceX;
+		distanceY = y - y1;
+		distanceX = x1 - x;
+		for (int i = 1; i < distanceX; i++) {
+			for (int j = 1; j < distanceY; j++) {
+
+
+
+				if ((board[y1 + j][x1 - i] != '*') && (i == j)) {
+					cout << "test1" << endl;
+					cout << i << endl;
+					cout << j << endl;
+					return false;
+					break;
+				}
+
+			}
+		}
+	}
+
+	if (((board[y][x] == 'M') && (board[y1][x1] == '*')) && ((y > y1) && (x > x1))) {
+		int distanceY;
+		int distanceX;
+		distanceY = y - y1;
+		distanceX = x - x1;
+		for (int i = 1; i < distanceX; i++) {
+			for (int j = 1; j < distanceY; j++) {
+
+
+
+				if ((board[y1 + j][x1 + i] != '*') && (i == j)) {
+					cout << "test1" << endl;
+					cout << i << endl;
+					cout << j << endl;
+					return false;
+					break;
+				}
+
+			}
+		}
+	}*/
+
 	if ((board[y][x] == 'M') && (board[y1][x1] == '*')) {
 		board[y1][x1] = currentPlayerKing;
 		board[y][x] = '*';
 		return true;
 	}
 
-	
+	/*if (((board[y][x] == 'W') && (board[y1][x1] == '*')) && ((y < y1) && (x < x1))) {
+		int distanceY;
+		int distanceX;
+		distanceY = y1 - y;
+		distanceX = x1 - x;
+		for (int i = 1; i < distanceX; i++) {
+			for (int j = 1; j < distanceY; j++) {
+
+
+
+				if ((board[y1 - j][x1 - i] != '*') && (i == j)) {
+					cout << "test1" << endl;
+					cout << i << endl;
+					cout << j << endl;
+					return false;
+					break;
+				}
+
+			}
+		}
+	}
+
+	if (((board[y][x] == 'W') && (board[y1][x1] == '*')) && ((y < y1) && (x > x1))) {
+		int distanceY;
+		int distanceX;
+		distanceY = y1 - y;
+		distanceX = x - x1;
+
+		for (int i = 1; i < distanceX; i++) {
+			for (int j = 1; j < distanceY; j++) {
+
+
+
+				if ((board[y1 - j][x1 + i] != '*') && (i == j)) {
+					cout << "test1" << endl;
+					cout << i << endl;
+					cout << j << endl;
+					return false;
+break;
+				}
+
+			}
+		}
+
+
+
+	}
+
+	if (((board[y][x] == 'W') && (board[y1][x1] == '*')) && ((y > y1) && (x < x1))) {
+		int distanceY;
+		int distanceX;
+		distanceY = y - y1;
+		distanceX = x1 - x;
+		for (int i = 1; i < distanceX; i++) {
+			for (int j = 1; j < distanceY; j++) {
+
+
+
+				if ((board[y1 + j][x1 - i] != '*') && (i == j)) {
+					cout << "test1" << endl;
+					cout << i << endl;
+					cout << j << endl;
+					return false;
+					break;
+				}
+
+			}
+		}
+	}
+
+	if (((board[y][x] == 'W') && (board[y1][x1] == '*')) && ((y > y1) && (x > x1))) {
+		int distanceY;
+		int distanceX;
+		distanceY = y - y1;
+		distanceX = x - x1;
+		for (int i = 1; i < distanceX; i++) {
+			for (int j = 1; j < distanceY; j++) {
+
+
+
+				if ((board[y1 + j][x1 + i] != '*') && (i == j)) {
+					cout << "test1" << endl;
+					cout << i << endl;
+					cout << j << endl;
+					return false;
+					break;
+				}
+
+			}
+		}
+	}*/
+
+
 	if ((board[y][x] == 'W') && (board[y1][x1] == '*')) {
 		board[y1][x1] = currentPlayerKing;
 		board[y][x] = '*';
@@ -674,7 +860,7 @@ bool CheckerBoard::hitMultiplierBottomRightO(int x1, int y1, int &setX, int &set
 			return false;
 		}
 
-	} while (((board[i + setY][setX - i] == 'X') || (board[i + setY][setX - i] == 'M')));
+	} while (((board[i + setY][i + setX] == 'X') || (board[i + setY][i + setX] == 'M')));
 
 }
 
@@ -795,7 +981,7 @@ bool CheckerBoard::hitMultiplierBottomRightXNormal(int x1, int y1, int &setX, in
 			return false;
 		}
 
-	} while (((board[i + setY][i + setX] == 'O') || (board[i + setY][i + setX] == 'W')) && (board[j + setY][j + setX] == '*'));
+	} while (((board[i + setY][i + setX] == 'O') || (board[i + setY][i + setX] == 'W')));
 
 
 }
@@ -841,6 +1027,9 @@ bool CheckerBoard::hitMultiplierTopRightONormal(int x1, int y1, int &setX, int &
 			board[setY - j][j + setX] = currentPlayer;
 			cout << "A piece has been killed!" << endl;
 
+			setY = (setY - j);
+			setX = (j + setX);
+
 			i = i + 2;
 			j = j + 2;
 
@@ -851,7 +1040,7 @@ bool CheckerBoard::hitMultiplierTopRightONormal(int x1, int y1, int &setX, int &
 			return false;
 		}
 
-	} while (((board[i + setY][setX - i] == 'X') || (board[i + setY][setX - i] == 'M')));
+	} while (((board[setY - i][i + setX] == 'X') || (board[setY - i][i + setX] == 'M')));
 }
 
 bool CheckerBoard::hitMultiplierTopLeftONormal(int x1, int y1, int &setX, int &setY, int i, int j, char currentPlayer, bool &multiHit) {
@@ -864,6 +1053,9 @@ bool CheckerBoard::hitMultiplierTopLeftONormal(int x1, int y1, int &setX, int &s
 			board[setY - j][setX - j] = currentPlayer;
 			cout << "A piece has been killed!" << endl;
 
+			setY = (setY - j);
+			setX = (setX - j);
+
 			i = i + 2;
 			j = j + 2;
 
@@ -874,7 +1066,7 @@ bool CheckerBoard::hitMultiplierTopLeftONormal(int x1, int y1, int &setX, int &s
 			return false;
 		}
 
-	} while (((board[i + setY][setX - i] == 'X') || (board[i + setY][setX - i] == 'M')));
+	} while (((board[setY - i][setX - i] == 'X') || (board[setY - i][setX - i] == 'M')));
 
 }
 
@@ -888,6 +1080,9 @@ bool CheckerBoard::hitMultiplierBottomRightONormal(int x1, int y1, int &setX, in
 			board[j + setY][j + setX] = currentPlayer;
 			cout << "A piece has been killed!" << endl;
 
+			setY = (j + setY);
+			setX = (j + setX);
+
 			i = i + 2;
 			j = j + 2;
 
@@ -898,7 +1093,7 @@ bool CheckerBoard::hitMultiplierBottomRightONormal(int x1, int y1, int &setX, in
 			return false;
 		}
 
-	} while (((board[i + setY][setX - i] == 'X') || (board[i + setY][setX - i] == 'M')));
+	} while (((board[i + setY][i + setX] == 'X') || (board[i + setY][i + setX] == 'M')));
 
 }
 
@@ -910,6 +1105,9 @@ bool CheckerBoard::hitMultiplierBottomLeftONormal(int x1, int y1, int &setX, int
 			
 			board[j + setY][setX - j] = currentPlayer;
 			cout << "A piece has been killed!" << endl;
+
+			setY = (j + setY);
+			setX = (setX - j);
 
 			i = i + 2;
 			j = j + 2;
@@ -1220,11 +1418,11 @@ bool CheckerBoard::checkHit(int x, int y, int x1, int y1, int i, int j, int &set
 			
 		}
 
-		while (topRightCheck == true || topLeftCheck == true || bottomLeftCheck == true || bottomRightCheck == true);
+		while (bottomLeftCheck == true || bottomRightCheck == true);
 
 
-		if ((multiHit == false) && (currentPlayer != 'M')) {
-		
+		if ((multiHit == false)) {
+			
 			board[(1 + y1)][(1 + x1)] = currentPlayer;
 		}
 
@@ -1260,11 +1458,12 @@ bool CheckerBoard::checkHit(int x, int y, int x1, int y1, int i, int j, int &set
 			
 		}
 
-		while (topRightCheck == true || topLeftCheck == true || bottomLeftCheck == true || bottomRightCheck == true);
+		while (bottomLeftCheck == true || bottomRightCheck == true);
 
 
 
 		if (multiHit == false) {
+			
 			board[(1 + y1)][(x1 - 1)] = currentPlayer;
 		}
 
@@ -1281,6 +1480,7 @@ bool CheckerBoard::checkHit(int x, int y, int x1, int y1, int i, int j, int &set
 		board[(y1 - 1)][(1 + x1)] = currentPlayer;
 		setY = (y1 - 1);
 		setX = (1 + x1);
+		
 
 
 		do {
@@ -1288,12 +1488,12 @@ bool CheckerBoard::checkHit(int x, int y, int x1, int y1, int i, int j, int &set
 
 			findCurrentPlayer(x, y, x1, y1, setX, setY, currentPlayer);
 
-			bottomRightCheck = hitMultiplierBottomRightXNormal(x1, y1, setX, setY, i, j, currentPlayer, multiHit);
-	
+			topRightCheck = hitMultiplierTopRightONormal(x1, y1, setX, setY, i, j, currentPlayer, multiHit);
 
+			
 			findCurrentPlayer(x, y, x1, y1, setX, setY, currentPlayer);
 
-			bottomLeftCheck = hitMultiplierBottomLeftXNormal(x1, y1, setX, setY, i, j, currentPlayer, multiHit);
+			topLeftCheck = hitMultiplierTopLeftONormal(x1, y1, setX, setY, i, j, currentPlayer, multiHit);
 
 			
 			board[setY][setX] = currentPlayer;
@@ -1301,10 +1501,11 @@ bool CheckerBoard::checkHit(int x, int y, int x1, int y1, int i, int j, int &set
 		
 		}
 
-		while (topRightCheck == true || topLeftCheck == true || bottomLeftCheck == true || bottomRightCheck == true);
+		while (topRightCheck == true || topLeftCheck == true);
 
 
-		if ((multiHit == false ) && (currentPlayer != 'M')) {
+		if ((multiHit == false )) {
+			
 			
 			board[(y1 - 1)][(1 + x1)] = currentPlayer;
 		}
@@ -1322,18 +1523,19 @@ bool CheckerBoard::checkHit(int x, int y, int x1, int y1, int i, int j, int &set
 		board[(y1 - 1)][(x1 - 1)] = currentPlayer;
 		setY = (y1 - 1);
 		setX = (x1 - 1);
+		
 
 		do {
 
 
 			findCurrentPlayer(x, y, x1, y1, setX, setY, currentPlayer);
 
-			bottomRightCheck = hitMultiplierBottomRightXNormal(x1, y1, setX, setY, i, j, currentPlayer, multiHit);
+			topRightCheck = hitMultiplierTopRightONormal(x1, y1, setX, setY, i, j, currentPlayer, multiHit);
 		
 
 			findCurrentPlayer(x, y, x1, y1, setX, setY, currentPlayer);
 
-			bottomLeftCheck = hitMultiplierBottomLeftXNormal(x1, y1, setX, setY, i, j, currentPlayer, multiHit);
+			topLeftCheck = hitMultiplierBottomLeftONormal(x1, y1, setX, setY, i, j, currentPlayer, multiHit);
 
 		
 			board[setY][setX] = currentPlayer;
@@ -1341,10 +1543,11 @@ bool CheckerBoard::checkHit(int x, int y, int x1, int y1, int i, int j, int &set
 			
 		}
 
-		while (topRightCheck == true || topLeftCheck == true || bottomLeftCheck == true || bottomRightCheck == true);
+		while (topRightCheck == true || topLeftCheck == true);
 
 	
 		if (multiHit == false) {
+			
 			board[(y1 - 1)][(x1 - 1)] = currentPlayer;
 		}
 
