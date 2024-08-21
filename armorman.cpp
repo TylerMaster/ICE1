@@ -235,7 +235,7 @@ void CArmorMan::Precache()
 
 int CArmorMan::Classify()
 {
-	return CLASS_HUMAN_MILITARY; // Or whatever classification is appropriate for your game
+	return CLASS_HUMAN_MILITARY; 
 }
 
 void CArmorMan::SetYawSpeed() {
@@ -442,7 +442,7 @@ Schedule_t* CArmorMan::GetSchedule() {
 									Vector vecEnemyLocation = m_hEnemy->pev->origin - pev->origin;
 									float flDist = vecEnemyLocation.Length();
 									Vector vecDirToEnemy = (m_hEnemy->pev->origin - pev->origin).Normalize();
-									float flDot = DotProduct(vecDirToEnemy, gpGlobals->v_forward); // Use gpGlobals->v_forward for NPC's forward direction
+									float flDot = DotProduct(vecDirToEnemy, gpGlobals->v_forward);
 
 									if (CheckRangeAttack1(flDot, flDist)) {
 
