@@ -144,11 +144,7 @@ public:
 	BOOL CArmorMan::CheckAmmo1();
 	BOOL CArmorMan::CheckWallDistance();
 	void CArmorMan::TurnRight();
-	
-	
 	void TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) override;
-
-
 	CUSTOM_SCHEDULES;
 
 private:
@@ -161,12 +157,8 @@ private:
 	int m_flNextHealthTime;
 	int m_distance;
 	int m_flNextDisCheckTime;
-	
 	BOOL m_healthCycle;
 };
-
-
-
 
 LINK_ENTITY_TO_CLASS(monster_armorman, CArmorMan);
 
@@ -180,7 +172,6 @@ DEFINE_CUSTOM_SCHEDULES(CArmorMan)
 };
 
 IMPLEMENT_CUSTOM_SCHEDULES(CArmorMan, CBaseMonster);
-
 
 
 void CArmorMan::Spawn()
@@ -210,8 +201,6 @@ void CArmorMan::Spawn()
 	m_healthCycle = FALSE;
 	MonsterInit();
 	m_distance = 0;
-
-
 }
 
 void CArmorMan::Precache()
@@ -242,8 +231,6 @@ void CArmorMan::Precache()
 	PRECACHE_SOUND("weapons/shotgun_reload_shell_drop.wav");
 	PRECACHE_SOUND("weapons/shotgun_reload_insert.wav");
 	PRECACHE_SOUND("weapons/shotgun_reload_close.wav");
-
-
 }
 
 int CArmorMan::Classify()
@@ -263,9 +250,6 @@ BOOL CArmorMan::CheckAmmo1()
 	}
 	return FALSE;
 }
-
-
-
 
 BOOL CArmorMan::CheckRangeAttack1(float flDot, float flDist)
 {
@@ -299,8 +283,6 @@ BOOL CArmorMan::CheckWallDistance()
 	return TRUE;
 }
 
-
-
 void CArmorMan::TurnRight()
 {
 	pev->angles.y += 90.0f;
@@ -326,12 +308,10 @@ void CArmorMan::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDi
 	
 }
 
-
 void CArmorMan::Shoot(void)
 {
 
 
-	//Vector(10.0f, 20.0f, 10.0f)
 
 	if (m_hEnemy == NULL)
 	{
@@ -616,10 +596,6 @@ void CArmorMan::StartTask(Task_t* pTask)
 	{
 	case TASK_GET_PATH_TO_LOCATION:
 
-		
-			
-		
-		
 		if (BuildRoute(vecGoal, bits_MF_TO_LOCATION, NULL))
 		{
 			TaskComplete();
