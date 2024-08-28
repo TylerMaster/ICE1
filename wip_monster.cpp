@@ -360,7 +360,7 @@ Schedule_t* CPitDrone::GetSchedule(void)
 		Vector vecEnemyLocation = m_hEnemy->pev->origin - pev->origin;
 		float flDist = vecEnemyLocation.Length();
 		Vector vecDirToEnemy = (m_hEnemy->pev->origin - pev->origin).Normalize();
-		float flDot = DotProduct(vecDirToEnemy, gpGlobals->v_forward); // Use gpGlobals->v_forward for NPC's forward direction
+		float flDot = DotProduct(vecDirToEnemy, gpGlobals->v_forward); 
 		BOOL range;
 		range = CheckRangeAttack1(flDot, flDist);
 		ALERT(at_console, "Range: %d\n", range);
