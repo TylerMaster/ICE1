@@ -1,0 +1,1038 @@
+using System.ComponentModel.Design;
+using System.Numerics;
+using System.Security.Cryptography.X509Certificates;
+using ConsoleTables;
+using static Program;
+
+internal class Program
+{
+    public enum EmployeeType
+    {
+        HourlyEmployee,
+        CommissionEmployee,
+        SalariedEmployee,
+        SalariedPlusCommissionEmployee
+    }
+    public abstract class Employee
+    {
+        protected string firstName;
+        protected string lastName;
+        protected int employeeID;
+
+
+        protected EmployeeType employeeType;
+
+
+
+        public Employee(string firstName, string lastName, int employeeID, EmployeeType employeeType)
+        {
+            this.firstName = firstName;
+            this.lastName = lastName;
+            this.employeeID = employeeID;
+            this.employeeType = employeeType;
+        }
+
+        public abstract double GrossEarnings { get; }
+        public double Tax { get => Math.Round(this.GrossEarnings * 0.20, 2); }
+        public double NetEarnings { get => Math.Round(this.GrossEarnings - this.Tax,2); }
+
+        public EmployeeType GetEmployeeType { get => this.employeeType; }
+
+        public string FirstName { get => this.firstName; set => this.firstName = value; }
+        public string LastName { get => this.lastName; set => this.lastName = value; }
+
+        public int EmployeeID { get => this.employeeID; }
+
+
+
+
+
+        public override string ToString()
+        {
+            return $"Employee ID: {employeeID}, Last Name: {lastName}, First Name: {firstName}";
+        }
+
+
+    }
+
+
+
+    public class SalariedEmployee : Employee
+    {
+
+        private double weeklySalary;
+        public override double GrossEarnings
+        {
+            get { return weeklySalary; }
+        }
+
+
+
+        public SalariedEmployee(string firstName, string lastName, int employeeID, EmployeeType employeeType, double weeklySalary) : base(firstName, lastName, employeeID, employeeType)
+        {
+            {
+                this.weeklySalary = weeklySalary;
+            }
+        }
+
+        public double WeeklySalary { get => this.weeklySalary; set => this.weeklySalary = value; }
+
+
+
+        public override string ToString()
+        {
+            return base.ToString() + $", Weekly Salary: {weeklySalary:C}";
+        }
+    }
+
+    public class CommissionEmployee : Employee
+    {
+
+        protected double grossSales;
+        protected double commissionRate;
+
+        public override double GrossEarnings
+        {
+            get => Math.Round(grossSales * (commissionRate / 100), 2);
+        }
+
+        public CommissionEmployee(string firstName, string lastName, int employeeID, EmployeeType employeeType, double grossSales, double commissionRate)
+      : base(firstName, lastName, employeeID, employeeType)
+        {
+            this.grossSales = grossSales;
+            this.commissionRate = commissionRate;
+        }
+        public double GrossSales { get => this.grossSales; set => this.grossSales = value; }
+        public double CommissionRate { get => this.commissionRate; set => this.commissionRate = value; }
+
+    }
+
+    public class HourlyEmployee : Employee
+    {
+        private double hourlyWage;
+        private double hoursWorked;
+
+
+        public HourlyEmployee(string firstName, string lastName, int employeeID, EmployeeType employeeType, double hourlyWage, double hoursWorked)
+        : base(firstName, lastName, employeeID, employeeType)
+        {
+            this.hourlyWage = hourlyWage;
+            this.hoursWorked = hoursWorked;
+        }
+
+        public override double GrossEarnings
+        {
+            get => (hoursWorked <= 40)
+                ? hourlyWage * hoursWorked
+                : (40 * hourlyWage) + ((hoursWorked - 40) * hourlyWage * 1.5);
+        }
+
+        public double HourlyWage { get => this.hourlyWage; set => this.hourlyWage = value;}
+        public double HoursWorked { get => this.hoursWorked; set => this.hoursWorked = value; }
+
+        public override string ToString()
+        {
+            return base.ToString() + $", Hourly Wage: {hourlyWage:C}, Hours Worked: {hoursWorked}";
+        }
+
+    }
+
+
+    public class SalaryPlusCommissionEmployee : CommissionEmployee
+    {
+        private double baseSalary;
+
+
+        public SalaryPlusCommissionEmployee(string firstName, string lastName, int employeeID, EmployeeType employeeType, double grossSales, double commissionRate, double baseSalary)
+         : base(firstName, lastName, employeeID, employeeType, grossSales, commissionRate)
+        {
+            this.baseSalary = baseSalary;
+        }
+
+        public override double GrossEarnings
+        {
+            get => Math.Round(baseSalary + (grossSales * (commissionRate / 100)), 2);
+        }
+
+        public double BaseSalary { get  => this.baseSalary; set => this.baseSalary = value; }
+
+
+        public override string ToString()
+        {
+            return base.ToString() + $", Base Salary: {baseSalary:C}";
+        }
+    }
+
+    static void Main(string[] args)
+    {
+        Dictionary<int, Employee> employees = new Dictionary<int, Employee>();
+
+        InitializeEmployees(employees);
+        MainMenu(employees);
+
+    }
+
+    public static int GenerateID(Dictionary<int, Employee> employees)
+    {
+        var rand = new Random();
+        int generatedNumber = rand.Next(0, 10000);
+        int result = Search(employees, generatedNumber);
+
+        if (result > 0)
+        {
+            do
+            {
+
+                generatedNumber = rand.Next(0, 10000);
+                result = Search(employees, generatedNumber);
+                if (result == 0)
+                {
+                    break;
+                }
+            } while (result > 0);
+        }
+        return generatedNumber;
+    }
+
+    public static int Search(Dictionary<int, Employee> employees, int key)
+    {
+        if (employees.ContainsKey(key))
+        {
+            return 1;
+        }
+        return 0;
+
+    }
+
+    public static void AddSalariedEmployee(Dictionary<int, Employee> employees, string firstName, string lastName, EmployeeType employeeType, double weeklySalary)
+    {
+
+        int myEmployeeID = 0;
+        myEmployeeID = GenerateID(employees);
+        SalariedEmployee salaryEmployee = new SalariedEmployee(firstName, lastName, myEmployeeID, employeeType, weeklySalary);
+
+        employees.Add(myEmployeeID, salaryEmployee);
+
+    }
+
+    public static void AddHourlyEmployee(Dictionary<int, Employee> employees, string firstName, string lastName, EmployeeType employeeType, double hourlyWage, double hoursWorked)
+    {
+        int myEmployeeID = 0;
+        myEmployeeID = GenerateID(employees);
+        HourlyEmployee hourlyEmployee = new HourlyEmployee(firstName, lastName, myEmployeeID, employeeType, hourlyWage, hoursWorked);
+
+        employees.Add(myEmployeeID, hourlyEmployee);
+    }
+
+    public static void AddCommissionEmployee(Dictionary<int, Employee> employees, string firstName, string lastName, EmployeeType employeeType, double grossSales, double commissionRate)
+    {
+        int myEmployeeID = 0;
+        myEmployeeID = GenerateID(employees);
+        CommissionEmployee commissionEmployee = new CommissionEmployee(firstName, lastName, myEmployeeID, employeeType, grossSales, commissionRate);
+
+        employees.Add(myEmployeeID, commissionEmployee);
+    }
+
+    public static void AddSalaryPlusCommissionEmployee(Dictionary<int, Employee> employees, string firstName, string lastName, EmployeeType employeeType, double grossSales, double commissionRate, double baseSalary)
+    {
+        int myEmployeeID = 0;
+        myEmployeeID = GenerateID(employees);
+        SalaryPlusCommissionEmployee salaryPlusCommissionEmployee = new SalaryPlusCommissionEmployee(firstName, lastName, myEmployeeID, employeeType, grossSales, commissionRate, baseSalary);
+
+        employees.Add(myEmployeeID, salaryPlusCommissionEmployee);
+    }
+    public static int SelectEmployeeType(Dictionary<int, Employee> employees)
+    {
+        Console.WriteLine("Add New Employee: \n");
+        Console.WriteLine("\t1 - Add Hourly Employee\n\t2 - Add Commission Employee\n\t3 - Add Salary + Commission Employee\n\t4 - Add Salaried Employee\n\t5 - Back to Main Menu\n");
+        int resultAsciiValue = 0;
+        resultAsciiValue = MenuValidator(49, 53);
+        Console.Clear();
+        return resultAsciiValue;
+
+    }
+
+    public static int MenuValidator(int low, int high)
+    {
+        string input;
+        char inputChar;
+        int asciiValue = 0;
+        
+        do
+        {
+            Console.WriteLine("Enter your choice: ");
+            input = (Console.ReadLine());
+            inputChar = input[0];
+            asciiValue = (int)inputChar;
+            if (asciiValue < low || asciiValue > high)
+            {
+                Console.WriteLine("Invalid Input");
+            }
+        } while (asciiValue < low || asciiValue > high);
+        return asciiValue;
+    }
+
+    public static void InitializeEmployees(Dictionary<int, Employee> employees)
+    {
+        
+        AddHourlyEmployee(employees, "Bill", "Doe", EmployeeType.HourlyEmployee, 20, 39);
+        AddHourlyEmployee(employees, "Mark", "Ranger", EmployeeType.HourlyEmployee, 25, 20);
+        AddSalariedEmployee(employees, "Emma", "Perri", EmployeeType.SalariedEmployee, 45600);
+        AddCommissionEmployee(employees, "Michael", "Brown", EmployeeType.CommissionEmployee, 543, 20);
+        AddSalaryPlusCommissionEmployee(employees, "Bill", "Gofer", EmployeeType.SalariedPlusCommissionEmployee, 45600, 25, 25000);
+        AddCommissionEmployee(employees, "Tim", "Garrison", EmployeeType.CommissionEmployee, 6000, 25);
+        AddSalaryPlusCommissionEmployee(employees, "Markus", "Burger", EmployeeType.SalariedPlusCommissionEmployee, 40000, 20, 15000);
+    }
+
+    public static void MainMenu(Dictionary<int, Employee> employees)
+    {
+        Console.WriteLine("\tASSIGNMENT-1 by Brandon Smith\n\n");
+
+        Console.WriteLine("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n");
+
+        Console.WriteLine("\t1 - Add Employee\n\t2 - Edit Employee\n\t3 - Delete Employee\n\t4 - View Employees\n\t5 - Search Employee\n\t6 - Exit\n");
+        int resultAsciiValue = 0;
+
+        //fields
+        string firstName;
+        string lastName;
+        double weeklySalary;
+        double hourlyWage;
+        double hoursWorked;
+        double grossSales;
+        double commissionRate;
+        double baseSalary;
+
+
+        int typeAscii = 0;
+        resultAsciiValue = MenuValidator(49, 54);
+        Console.Clear();
+        EmployeeType employeeType;
+        switch (resultAsciiValue)
+        {
+            case 49:
+
+                ;
+                typeAscii = SelectEmployeeType(employees);
+                switch (typeAscii)
+                {
+                    case 49:
+                        employeeType = EmployeeType.HourlyEmployee;
+                        firstName = FormToAddEmployeeFirstName(employees);
+                        lastName = FormToAddEmployeeLastName(employees);
+                        Console.WriteLine("Hourly Wage $ - No letters please: ");
+                        hourlyWage = double.Parse(NumericStringValidator(48, 57));
+                        Console.WriteLine("Hours Worked - No letters please: ");
+                        hoursWorked = double.Parse(NumericStringValidator(48, 57));
+                        AddHourlyEmployee(employees, firstName, lastName, employeeType, hourlyWage, hoursWorked);
+                        MainMenu(employees);
+                        break;
+                    case 50:
+                        employeeType = EmployeeType.CommissionEmployee;
+                        firstName = FormToAddEmployeeFirstName(employees);
+                        lastName = FormToAddEmployeeLastName(employees);
+                        Console.WriteLine("Gross Sales $ - No letters please: ");
+                        grossSales = double.Parse(NumericStringValidator(48, 57));
+                        Console.WriteLine("Commission Rate % - No letters please: ");
+                        commissionRate = double.Parse(NumericStringValidator(48, 57));
+                        AddCommissionEmployee(employees, firstName, lastName, employeeType, grossSales, commissionRate);
+                        MainMenu(employees);
+                        break;
+                    case 51:
+                        employeeType = EmployeeType.SalariedPlusCommissionEmployee;
+                        firstName = FormToAddEmployeeFirstName(employees);
+                        lastName = FormToAddEmployeeLastName(employees);
+                        Console.WriteLine("Gross Sales $ - No letters please: ");
+                        grossSales = double.Parse(NumericStringValidator(48, 57));
+                        Console.WriteLine("Commission Rate % - No letters please: ");
+                        commissionRate = double.Parse(NumericStringValidator(48, 57));
+                        Console.WriteLine("Base Salary $ - No letters please: ");
+                        baseSalary = double.Parse(NumericStringValidator(48, 57));
+                        AddSalaryPlusCommissionEmployee(employees, firstName, lastName, employeeType, grossSales, commissionRate, baseSalary);
+                        MainMenu(employees);
+                        break;
+                    case 52:
+                        employeeType = EmployeeType.SalariedEmployee;
+                        firstName = FormToAddEmployeeFirstName(employees);
+                        lastName = FormToAddEmployeeLastName(employees);
+                        
+                            Console.WriteLine("Weekly Salary - No letters please: ");
+                        weeklySalary = double.Parse(NumericStringValidator(48, 57));
+
+
+                        AddSalariedEmployee(employees, firstName, lastName, employeeType, weeklySalary);
+                        MainMenu(employees);
+                        break;
+                    case 53:
+                        Console.Clear();
+                        MainMenu(employees);
+                        break;
+                    default:
+                        Console.WriteLine("Nothing");
+                        break;
+                }
+
+                break;
+            case 50:
+                Edit(employees);
+                break;
+            case 51:
+                Delete(employees);
+                break;
+            case 52:
+                View(employees);
+                break;
+            case 53:
+                Search(employees);
+                break;
+            case 54:
+                Environment.Exit(0);
+                break;
+            default:
+                Console.WriteLine("nothing");
+                break;
+
+        }
+    }
+    public static string FormToAddEmployeeFirstName(Dictionary<int, Employee> employees)
+    {
+        Console.WriteLine("FirstName? (only A-Z and a-z allowed): ");
+        string firstName;
+        bool validInput = false;
+        do
+        {
+            firstName = Console.ReadLine();
+
+            foreach (char c in firstName)
+            {
+                int asciiValue = (int)c;
+
+                if (!(asciiValue >= 65 && asciiValue <= 90 || asciiValue >= 97 && asciiValue <= 122))
+                {
+                    validInput = false;
+                    Console.WriteLine("Invalid Input");
+                    Console.WriteLine("FirstName? (only A-Z and a-z allowed): ");
+                    break;
+                }
+                else
+                {
+                    validInput = true;
+
+                }
+            }
+
+
+        } while (validInput == false);
+        return firstName;
+    }
+
+    public static string NumericStringValidator(int low, int high)
+    {
+        string number;
+        bool validInput = false;
+        do
+        {
+            number = Console.ReadLine();
+            foreach (char c in number)
+            {
+                int asciiValue = (int)c;
+                if (asciiValue < low || asciiValue > high)
+                {
+                    validInput = false;
+                    Console.WriteLine("Invalid Input");
+                    Console.WriteLine("Only Type numbers please.");
+                    break;
+                }
+                else
+                {
+                    validInput = true;
+
+                }
+            }
+
+        } while (validInput == false);
+        return number;
+    }
+    public static void Search(Dictionary<int, Employee> employees)
+    {
+
+        int hourlyCount = 0;
+        int salaryCount = 0;
+        int commissionCount = 0;
+        int salaryPlusCommissionCount = 0;
+
+        ConsoleTable tableHourlyEmployee = new ConsoleTable("Id", "First Name", "Last Name", "Hours Worked", "Hourly Wage", "Net Earning", "Tax (20%)", "Net Earnings");
+        ConsoleTable tableSalariedEmployee = new ConsoleTable("Id", "First Name", "Last Name", "Salary", "Gross Earnings", "Tax (20%)", "Net Earnings");
+        ConsoleTable tableSalaryPlusCommissionEmployee = new ConsoleTable("Id", "First Name", "Last Name", "Salary", "Gross Sales", "Commission Rate", "Gross Earnings", "Tax (20%)", "Net Earnings");
+        ConsoleTable tableCommissionEmployee = new ConsoleTable("Id", "First Name", "Last Name", "Gross Sales", "Commission Rate", "Gross Earning", "Tax (20%)", "Net Earnings");
+
+        Console.WriteLine("Enter Employee name to search: ");
+        string input = Console.ReadLine()?.ToLower();
+
+        foreach (KeyValuePair<int, Employee> item in employees)
+        {
+            if (item.Value.FirstName.ToLower().Contains(input))
+            {
+                if (item.Value is HourlyEmployee hourlyEmployee)
+                {
+                    ++hourlyCount;
+                    tableHourlyEmployee.AddRow(hourlyEmployee.EmployeeID, hourlyEmployee.FirstName, hourlyEmployee.LastName, hourlyEmployee.HoursWorked, hourlyEmployee.HourlyWage, ("$" + hourlyEmployee.GrossEarnings), ("$" + hourlyEmployee.Tax), ("$" + hourlyEmployee.NetEarnings));
+
+                }
+
+                if (item.Value is SalariedEmployee salaryEmployee)
+                {
+                    ++salaryCount;
+                    tableSalariedEmployee.AddRow(salaryEmployee.EmployeeID, salaryEmployee.FirstName, salaryEmployee.LastName, ("$" + salaryEmployee.GrossEarnings), ("$" + salaryEmployee.GrossEarnings), ("$" + salaryEmployee.Tax), ("$" + salaryEmployee.NetEarnings));
+
+                }
+
+                if (item.Value is SalaryPlusCommissionEmployee salaryPlusCommissionEmployee)
+                {
+                    if (salaryPlusCommissionEmployee.GetEmployeeType == EmployeeType.SalariedPlusCommissionEmployee)
+                    {
+                        ++salaryPlusCommissionCount;
+                        tableSalaryPlusCommissionEmployee.AddRow(salaryPlusCommissionEmployee.EmployeeID, salaryPlusCommissionEmployee.FirstName, salaryPlusCommissionEmployee.LastName, ("$" + salaryPlusCommissionEmployee.BaseSalary), ("$" + salaryPlusCommissionEmployee.GrossSales), (salaryPlusCommissionEmployee.CommissionRate + "%"), ("$" + salaryPlusCommissionEmployee.GrossEarnings), ("$" + salaryPlusCommissionEmployee.Tax), ("$" + salaryPlusCommissionEmployee.NetEarnings));
+                    }
+                }
+
+                if (item.Value is CommissionEmployee commissionEmployee)
+                {
+
+                    if (commissionEmployee.GetEmployeeType == EmployeeType.CommissionEmployee)
+                    {
+                        ++commissionCount;
+                        tableCommissionEmployee.AddRow(commissionEmployee.EmployeeID, commissionEmployee.FirstName, commissionEmployee.LastName, ("$" + commissionEmployee.GrossSales), (commissionEmployee.CommissionRate + "%"), ("$" + commissionEmployee.GrossEarnings), ("$" + commissionEmployee.Tax), ("$" + commissionEmployee.NetEarnings));
+                    }
+                }
+            }
+        }
+
+
+        if (hourlyCount > 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Hourly Employees: ");
+            tableHourlyEmployee.Write();
+            Console.ResetColor();
+        }
+        
+
+        if (salaryCount > 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("Salaried Employees: ");
+            tableSalariedEmployee.Write();
+            Console.ResetColor();
+        }
+       
+
+        if (salaryPlusCommissionCount > 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Salary Plus Commission Employees: ");
+            tableSalaryPlusCommissionEmployee.Write();
+            Console.ResetColor();
+        }
+        
+
+        if (commissionCount > 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Commission Employees: ");
+            tableCommissionEmployee.Write();
+            Console.ResetColor();
+        }
+        if (commissionCount == 0 && salaryCount == 0 && salaryPlusCommissionCount == 0 && hourlyCount == 0)
+        {
+            Console.WriteLine("No matches found.");
+        }
+
+        Console.WriteLine("Press enter to continue: ");
+        string input3 = Console.ReadLine();
+        Console.Clear();
+        MainMenu(employees);
+
+
+    }
+    public static void Delete(Dictionary<int, Employee> employees)
+    {
+        Console.WriteLine("Delete Employees: ");
+        Console.WriteLine("\t1 - Delete Hourly Employee\n\t2 - Delete Commission Employee\n\t3 - Delete Salaried Employee\n\t4 - Delete Salary + Commission Employee\n\t5 - Back to Main Menu\n");
+        int resultAsciiValue = 0;
+        int result = 0;
+        int editID = 0;
+
+        resultAsciiValue = MenuValidator(49, 53);
+        switch (resultAsciiValue)
+        {
+
+            case 49:
+                Console.WriteLine("View All Hourly Employees:\n\n ");
+                HourlyEmployeeTable(employees);
+
+                Console.WriteLine("Delete Hourly Employee\n");
+
+
+                Console.WriteLine("Enter ID of employee you want to edit: ");
+                do
+                {
+                    editID = int.Parse(NumericStringValidator(48, 57));
+                    result = Search(employees, editID);
+                    if (result == 1)
+                    {
+                        break;
+                    }
+                    Console.WriteLine("ID not found");
+                } while (result == 0);
+                foreach (KeyValuePair<int, Employee> item in employees)
+                {
+                    if (item.Value is HourlyEmployee hourlyEmployee && hourlyEmployee.EmployeeID == editID)
+                    {
+
+                        employees.Remove(item.Key);
+                        Console.WriteLine($"Hourly Employee with ID {editID} removed.");
+                        break;
+                    }
+                }
+                HourlyEmployeeTable(employees);
+                Console.WriteLine("Press enter to continue: ");
+                string input = Console.ReadLine();
+                Console.Clear();
+                MainMenu(employees);
+                break;
+            case 50:
+                Console.WriteLine("View All Commission Employees:\n\n ");
+                CommissionEmployeeTable(employees);
+
+                Console.WriteLine("Delete Commission Employee\n");
+
+
+                Console.WriteLine("Enter ID of employee you want to edit: ");
+                do
+                {
+                    editID = int.Parse(NumericStringValidator(48, 57));
+                    result = Search(employees, editID);
+                    if (result == 1)
+                    {
+                        break;
+                    }
+                    Console.WriteLine("ID not found");
+                } while (result == 0);
+                foreach (KeyValuePair<int, Employee> item in employees)
+                {
+                    if (item.Value is CommissionEmployee commissionEmployee && commissionEmployee.EmployeeID == editID)
+                    {
+
+                        employees.Remove(item.Key);
+                        Console.WriteLine($"Commission Employee with ID {editID} removed.");
+                        break;
+                    }
+                }
+
+                CommissionEmployeeTable(employees);
+                Console.WriteLine("Press enter to continue: ");
+                string input1 = Console.ReadLine();
+                Console.Clear();
+                MainMenu(employees);
+                break;
+            case 51:
+                Console.WriteLine("View All Salaried Employees:\n\n ");
+                SalariedEmployeeTable(employees);
+
+                Console.WriteLine("Delete Salaried Employee\n");
+
+
+                Console.WriteLine("Enter ID of employee you want to edit: ");
+                do
+                {
+                    editID = int.Parse(NumericStringValidator(48, 57));
+                    result = Search(employees, editID);
+                    if (result == 1)
+                    {
+                        break;
+                    }
+                    Console.WriteLine("ID not found");
+                } while (result == 0);
+                foreach (KeyValuePair<int, Employee> item in employees)
+                {
+                    if (item.Value is SalariedEmployee salariedEmployee && salariedEmployee.EmployeeID == editID)
+                    {
+
+                        employees.Remove(item.Key);
+                        Console.WriteLine($"Salaried Employee with ID {editID} removed.");
+                        break;
+                    }
+                }
+                SalariedEmployeeTable(employees);
+                Console.WriteLine("Press enter to continue: ");
+                string input2 = Console.ReadLine();
+                Console.Clear();
+                MainMenu(employees);
+                break;
+            case 52:
+                Console.WriteLine("View All Salary + Commission Employees:\n\n ");
+                SalaryPlusCommissionEmployeeTable(employees);
+
+                Console.WriteLine("Delete Salary + Commission Employee\n");
+
+
+                Console.WriteLine("Enter ID of employee you want to edit: ");
+                do
+                {
+                    editID = int.Parse(NumericStringValidator(48, 57));
+                    result = Search(employees, editID);
+                    if (result == 1)
+                    {
+                        break;
+                    }
+                    Console.WriteLine("ID not found");
+                } while (result == 0);
+                foreach (KeyValuePair<int, Employee> item in employees)
+                {
+                    if (item.Value is SalaryPlusCommissionEmployee salaryPlusCommissionEmployee && salaryPlusCommissionEmployee.EmployeeID == editID)
+                    {
+
+                        employees.Remove(item.Key);
+                        Console.WriteLine($"Salary + Commission Employee with ID {editID} removed.");
+                        break;
+                    }
+                }
+                SalaryPlusCommissionEmployeeTable(employees);
+                Console.WriteLine("Press enter to continue: ");
+                string input3 = Console.ReadLine();
+                Console.Clear();
+                MainMenu(employees);
+                break;
+            case 53:
+                Console.Clear();
+                MainMenu(employees);
+                break;
+        }
+    }
+    public static void Edit(Dictionary<int, Employee> employees)
+    {
+        Console.WriteLine("Edit Employees: ");
+        Console.WriteLine("\t1 - Edit Hourly Employee\n\t2 - Edit Commission Employee\n\t3 - Edit Salaried Employee\n\t4 - Edit Salary + Commission Employee\n\t5 - Back to Main Menu\n");
+        int resultAsciiValue = 0;
+        int result = 0;
+        int editID = 0;
+
+        //fields
+
+        string firstName;
+        string lastName;
+        resultAsciiValue = MenuValidator(49, 53);
+        switch (resultAsciiValue)
+        {
+
+            case 49:
+                Console.WriteLine("View All Hourly Employees:\n\n ");
+                HourlyEmployeeTable(employees);
+
+                Console.WriteLine("Editing Hourly Employee\n");
+
+
+                Console.WriteLine("Enter ID of employee you want to edit: ");
+                do
+                {
+                    editID = int.Parse(NumericStringValidator(48, 57));
+                    result = Search(employees, editID);
+                    if (result == 1)
+                    {
+                        break;
+                    }
+                    Console.WriteLine("ID not found");
+                } while (result == 0);
+
+                firstName = FormToAddEmployeeFirstName(employees);
+                lastName = FormToAddEmployeeLastName(employees);
+                Console.WriteLine("Enter hourly wage: ");
+                int hourlyWage = int.Parse(NumericStringValidator(48, 57));
+                Console.WriteLine("Enter number of hours worked: ");
+                int hoursWorked = int.Parse(NumericStringValidator(48, 57));
+
+                foreach (KeyValuePair<int, Employee> item in employees)
+                {
+                    if (item.Value is HourlyEmployee hourlyEmployee && hourlyEmployee.EmployeeID == editID)
+                    {
+                        hourlyEmployee.FirstName = firstName;
+                        hourlyEmployee.LastName = lastName;
+                        hourlyEmployee.HourlyWage = hourlyWage;
+                        hourlyEmployee.HoursWorked = hoursWorked;
+
+                    }
+                }
+
+                HourlyEmployeeTable(employees);
+                Console.WriteLine("Press enter to continue: ");
+                string input = Console.ReadLine();
+                Console.Clear();
+                MainMenu(employees);
+
+                break;
+            case 50:
+                Console.WriteLine("View All Commission Employees:\n\n ");
+                CommissionEmployeeTable(employees);
+
+                Console.WriteLine("Editing Commission Employee\n");
+
+                Console.WriteLine("Enter ID of employee you want to edit: ");
+
+                do
+                {
+                    editID = int.Parse(NumericStringValidator(48, 57));
+                    result = Search(employees, editID);
+                    if (result == 1)
+                    {
+                        break;
+                    }
+                    Console.WriteLine("ID not found");
+                } while (result == 0);
+                firstName = FormToAddEmployeeFirstName(employees);
+                lastName = FormToAddEmployeeLastName(employees);
+                Console.WriteLine("Enter Gross Sales: ");
+                double grossSales = double.Parse(NumericStringValidator(48, 57));
+                Console.WriteLine("Enter Commission Rate: ");
+                double commissionRate = double.Parse(NumericStringValidator(48, 57));
+                foreach (KeyValuePair<int, Employee> item in employees)
+                {
+                    if (item.Value is CommissionEmployee commissionEmployee && commissionEmployee.EmployeeID == editID)
+                    {
+                        commissionEmployee.FirstName = firstName;
+                        commissionEmployee.LastName = lastName;
+                        commissionEmployee.GrossSales = grossSales;
+                        commissionEmployee.CommissionRate = commissionRate;
+
+                    }
+                }
+                CommissionEmployeeTable(employees);
+                Console.WriteLine("Press enter to continue: ");
+                string input1 = Console.ReadLine();
+                Console.Clear();
+                MainMenu(employees);
+
+                break;
+            case 51:
+                Console.WriteLine("View All Salaried Employees:\n\n ");
+                SalariedEmployeeTable(employees);
+
+                Console.WriteLine("Editing Salaried Employee\n");
+
+                Console.WriteLine("Enter ID of employee you want to edit: ");
+
+                do
+                {
+                    editID = int.Parse(NumericStringValidator(48, 57));
+                    result = Search(employees, editID);
+                    if (result == 1)
+                    {
+                        break;
+                    }
+                    Console.WriteLine("ID not found");
+                } while (result == 0);
+                firstName = FormToAddEmployeeFirstName(employees);
+                lastName = FormToAddEmployeeLastName(employees);
+                Console.WriteLine("Enter Weekly Salary: ");
+                double weeklySalary = double.Parse(NumericStringValidator(48, 57));
+
+                foreach (KeyValuePair<int, Employee> item in employees)
+                {
+                    if (item.Value is SalariedEmployee salariedEmployee && salariedEmployee.EmployeeID == editID)
+                    {
+                        salariedEmployee.FirstName = firstName;
+                        salariedEmployee.LastName = lastName;
+                        salariedEmployee.WeeklySalary = weeklySalary;
+
+                    }
+                }
+
+                SalariedEmployeeTable(employees);
+                Console.WriteLine("Press enter to continue: ");
+                string input2 = Console.ReadLine();
+                Console.Clear();
+                MainMenu(employees);
+                break;
+            case 52:
+                Console.WriteLine("View All Salary + Commission Employees:\n\n ");
+                SalaryPlusCommissionEmployeeTable(employees);
+
+                Console.WriteLine("Editing Salary + Commission Employee\n");
+
+                Console.WriteLine("Enter ID of employee you want to edit: ");
+
+                do
+                {
+                    editID = int.Parse(NumericStringValidator(48, 57));
+                    result = Search(employees, editID);
+                    if (result == 1)
+                    {
+                        break;
+                    }
+                    Console.WriteLine("ID not found");
+                } while (result == 0);
+
+                firstName = FormToAddEmployeeFirstName(employees);
+                lastName = FormToAddEmployeeLastName(employees);
+                Console.WriteLine("Enter Base Salary: ");
+                double baseSalary = double.Parse(NumericStringValidator(48, 57));
+                Console.WriteLine("Enter Gross Sales: ");
+                double grossSales1 = double.Parse(NumericStringValidator(48, 57));
+                Console.WriteLine("Enter Commission Rate: ");
+                double commissionRate1 = double.Parse(NumericStringValidator(48, 57));
+                foreach (KeyValuePair<int, Employee> item in employees)
+                {
+                    if (item.Value is SalaryPlusCommissionEmployee salaryPlusCommissionEmployee && salaryPlusCommissionEmployee.EmployeeID == editID)
+                    {
+                        salaryPlusCommissionEmployee.FirstName = firstName;
+                        salaryPlusCommissionEmployee.LastName = lastName;
+                        salaryPlusCommissionEmployee.GrossSales = grossSales1;
+                        salaryPlusCommissionEmployee.CommissionRate = commissionRate1;
+                        salaryPlusCommissionEmployee.BaseSalary = baseSalary;
+
+
+                    }
+                }
+                SalaryPlusCommissionEmployeeTable(employees);
+                Console.WriteLine("Press enter to continue: ");
+                string input3 = Console.ReadLine();
+                Console.Clear();
+                MainMenu(employees);
+
+                break;
+            case 53:
+                Console.Clear();
+                MainMenu(employees);
+                break;
+            default:
+                Console.WriteLine("nothing");
+                break;
+        }
+
+    }
+
+
+    public static void HourlyEmployeeTable(Dictionary<int, Employee> employees)
+    {
+        var tableHourlyEmployee = new ConsoleTable("Id", "First Name", "Last Name", "Hours Worked", "Hourly Wage", "Net Earning", "Tax (20%)", "Net Earnings");
+
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("Hourly Employees: ");
+        foreach (KeyValuePair<int, Employee> item in employees)
+        {
+            if (item.Value is HourlyEmployee hourlyEmployee)
+            {
+                tableHourlyEmployee.AddRow(hourlyEmployee.EmployeeID, hourlyEmployee.FirstName, hourlyEmployee.LastName, hourlyEmployee.HoursWorked, hourlyEmployee.HourlyWage, ("$" + hourlyEmployee.GrossEarnings), ("$" + hourlyEmployee.Tax), ("$" + hourlyEmployee.NetEarnings));
+
+            }
+        }
+        tableHourlyEmployee.Write();
+        Console.ResetColor();
+
+    }
+
+    public static void CommissionEmployeeTable(Dictionary<int, Employee> employees)
+    {
+        var tableCommissionEmployee = new ConsoleTable("Id", "First Name", "Last Name", "Gross Sales", "Commission Rate", "Gross Earning", "Tax (20%)", "Net Earnings");
+
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("Commission Employees: ");
+        foreach (KeyValuePair<int, Employee> item in employees)
+        {
+            if (item.Value is CommissionEmployee commissionEmployee)
+            {
+                if (commissionEmployee.GetEmployeeType == EmployeeType.CommissionEmployee)
+                {
+                    tableCommissionEmployee.AddRow(commissionEmployee.EmployeeID, commissionEmployee.FirstName, commissionEmployee.LastName, ("$" + commissionEmployee.GrossSales), (commissionEmployee.CommissionRate + "%"), ("$" + commissionEmployee.GrossEarnings), ("$" + commissionEmployee.Tax), ("$" + commissionEmployee.NetEarnings));
+                }
+            }
+        }
+        tableCommissionEmployee.Write();
+        Console.ResetColor();
+    }
+
+    public static void SalaryPlusCommissionEmployeeTable(Dictionary<int, Employee> employees)
+    {
+        var tableSalariedPlusCommissionEmployee = new ConsoleTable("Id", "First Name", "Last Name", "Salary", "Gross Sales", "Commission Rate", "Gross Earnings", "Tax (20%)", "Net Earnings");
+
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Salary Plus Commission Employees: ");
+        foreach (KeyValuePair<int, Employee> item in employees)
+        {
+            if (item.Value is SalaryPlusCommissionEmployee salaryPlusCommissionEmployee)
+            {
+                if (salaryPlusCommissionEmployee.GetEmployeeType == EmployeeType.SalariedPlusCommissionEmployee)
+                {
+                    tableSalariedPlusCommissionEmployee.AddRow(salaryPlusCommissionEmployee.EmployeeID, salaryPlusCommissionEmployee.FirstName, salaryPlusCommissionEmployee.LastName, ("$" + salaryPlusCommissionEmployee.BaseSalary), ("$" + salaryPlusCommissionEmployee.GrossSales), (salaryPlusCommissionEmployee.CommissionRate + "%"), ("$" + salaryPlusCommissionEmployee.GrossEarnings), ("$" + salaryPlusCommissionEmployee.Tax), ("$" + salaryPlusCommissionEmployee.NetEarnings));
+                }
+            }
+        }
+        tableSalariedPlusCommissionEmployee.Write();
+        Console.ResetColor();
+    }
+
+    public static void SalariedEmployeeTable(Dictionary<int, Employee> employees)
+    {
+        var tableSalariedEmployee = new ConsoleTable("Id", "First Name", "Last Name", "Salary", "Gross Earnings", "Tax (20%)", "Net Earnings");
+
+        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.WriteLine("Salaried Employees: ");
+        foreach (KeyValuePair<int, Employee> item in employees)
+        {
+            if (item.Value is SalariedEmployee salaryEmployee)
+            {
+
+                tableSalariedEmployee.AddRow(salaryEmployee.EmployeeID, salaryEmployee.FirstName, salaryEmployee.LastName, ("$" + salaryEmployee.GrossEarnings), ("$" + salaryEmployee.GrossEarnings), ("$" + salaryEmployee.Tax), ("$" + salaryEmployee.NetEarnings));
+
+            }
+        }
+        tableSalariedEmployee.Write();
+        Console.ResetColor();
+    }
+    public static void View(Dictionary<int, Employee> employees)
+    {
+
+        Console.WriteLine("View All Employees:\n\n ");
+
+        HourlyEmployeeTable(employees);
+        SalariedEmployeeTable(employees);
+        CommissionEmployeeTable(employees);
+        SalaryPlusCommissionEmployeeTable(employees);
+
+        Console.WriteLine("Press enter to continue: ");
+        string input = Console.ReadLine();
+        Console.Clear();
+        MainMenu(employees);
+    }
+
+    public static string FormToAddEmployeeLastName(Dictionary<int, Employee> employees)
+    {
+        Console.WriteLine("LastName? (only A-Z and a-z allowed): ");
+        string lastName;
+        bool validInput = false;
+        do
+        {
+            lastName = Console.ReadLine();
+            foreach (char c in lastName)
+            {
+                int asciiValue = (int)c;
+                if (!(asciiValue >= 65 && asciiValue <= 90 || asciiValue >= 97 && asciiValue <= 122))
+                {
+                    validInput = false;
+                    Console.WriteLine("Invalid Input");
+                    Console.WriteLine("lastName? (only A-Z and a-z allowed): ");
+                    break;
+                }
+                else
+                {
+                    validInput = true;
+
+                }
+            }
+
+        } while (validInput == false);
+        return lastName;
+
+
+    }
+}
