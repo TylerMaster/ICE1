@@ -325,6 +325,7 @@ internal class Program
                         Console.WriteLine("Hours Worked - No letters please: ");
                         hoursWorked = double.Parse(NumericStringValidator(48, 57));
                         AddHourlyEmployee(employees, firstName, lastName, employeeType, hourlyWage, hoursWorked);
+                        Console.Clear();
                         MainMenu(employees);
                         break;
                     case 50:
@@ -336,6 +337,7 @@ internal class Program
                         Console.WriteLine("Commission Rate % - No letters please: ");
                         commissionRate = double.Parse(NumericStringValidator(48, 57));
                         AddCommissionEmployee(employees, firstName, lastName, employeeType, grossSales, commissionRate);
+                        Console.Clear();
                         MainMenu(employees);
                         break;
                     case 51:
@@ -349,6 +351,7 @@ internal class Program
                         Console.WriteLine("Base Salary $ - No letters please: ");
                         baseSalary = double.Parse(NumericStringValidator(48, 57));
                         AddSalaryPlusCommissionEmployee(employees, firstName, lastName, employeeType, grossSales, commissionRate, baseSalary);
+                        Console.Clear();
                         MainMenu(employees);
                         break;
                     case 52:
@@ -361,6 +364,7 @@ internal class Program
 
 
                         AddSalariedEmployee(employees, firstName, lastName, employeeType, weeklySalary);
+                        Console.Clear();
                         MainMenu(employees);
                         break;
                     case 53:
@@ -716,7 +720,7 @@ internal class Program
         Console.WriteLine("\t1 - Edit Hourly Employee\n\t2 - Edit Commission Employee\n\t3 - Edit Salaried Employee\n\t4 - Edit Salary + Commission Employee\n\t5 - Back to Main Menu\n");
         int resultAsciiValue = 0;
         int result = 0;
-        int editID = 0;
+        int editID = 0; 
 
         //fields
 
