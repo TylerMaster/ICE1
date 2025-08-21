@@ -1,0 +1,988 @@
+// ConsoleGame.cpp : This file contains the 'main' function. Program execution begins and ends there.
+//
+#include <fstream>
+#include <chrono>
+#include <thread>
+#include <iostream>
+#include <windows.h>
+#include <map>
+#include <conio.h> 
+#include <vector>
+
+using namespace std;
+using namespace std::chrono;
+
+struct Coordinates {
+
+    int xCoordinate = 0;
+    int yCoordinate = 0;
+    int _y_Plus = 0;
+    int _y_Negation = 0;
+    int _x_Plus = 0;
+    int _x_Negation = 0;
+    
+};
+
+
+class EnemyMonster {
+    
+public:
+    
+    void SetCoordinates(char input, int setting, int mode);
+    int health = 100;
+    int moveCounterAi = 0;
+    bool moveCycle = false;
+
+    bool newInput = true;
+
+    int moveDirectionGen = 0;
+    int moveLengthGen = 0;
+
+    
+  
+    Coordinates cd;
+    Coordinates GetCoordinates();
+
+
+
+   
+protected:
+
+     virtual int TestFunction() { return 0; };
+
+private:
+ 
+    
+
+};
+
+
+void EnemyMonster::SetCoordinates(char input, int setting, int mode) {
+
+    if (input == 'x') {
+        cd.xCoordinate = setting;
+    }
+
+    if (input == 'y') {
+        cd.yCoordinate = setting;
+    }
+
+    if (input == 'x' && mode == 1) {
+        cd._x_Plus = setting + 1;
+    }
+    if (input == 'y' && mode == 1) {
+        cd._y_Plus = setting + 1;
+    }
+
+    if (input == 'x' && mode == 2) {
+        cd._x_Negation = setting - 1;
+    }
+
+    if (input == 'y' && mode == 2) {
+        cd._y_Negation = setting - 1;
+    }
+}
+
+Coordinates EnemyMonster::GetCoordinates() {
+    return this->cd;
+}
+
+class DroneMonster : public EnemyMonster {
+public:
+
+    bool _start_Bullet_Move = false;
+
+    int _monsterId;
+    
+    char weapon = 'o';
+    
+    DroneMonster(int monsterId) : _monsterId(monsterId) {
+
+    }
+
+    
+
+    int TestFunction() override {
+
+        return 0;
+    };
+  
+
+private:
+
+};
+
+
+
+typedef map<int, EnemyMonster*> DroneMonsterUnitMap;
+
+class Player {
+public:
+    int health;
+    
+    bool Shoot(char* inputChar);
+    void SetCoordinates(int x, int y);
+ 
+    char weapon = 'o';
+    
+    
+    Coordinates cd;
+    Coordinates GetCoordinates();
+    Player(int health) {
+        this->health = health;
+    }
+    void FindLocation(char array[12][53]);
+private:
+  
+};
+
+
+void Player::SetCoordinates(int x, int y) {
+
+    cd.xCoordinate = x;
+    cd.yCoordinate = y;
+
+
+}
+
+Coordinates Player::GetCoordinates() {
+    return this->cd;
+}
+
+void Player::FindLocation(char array[12][53]) {
+    bool breakFlag = false;
+    for (int i = 0; i < 12; i++) {
+        for (int j = 0; j < 53; j++) {
+            if (array[i][j] == '@') {
+                cd.xCoordinate = i;
+                cd.yCoordinate = j;
+                
+            }
+           
+        }
+     
+    }
+}
+
+bool Player::Shoot(char* inputChar){
+
+
+    return true;
+
+
+}
+
+class Bullet {
+public:
+    
+
+    int _bulletId = 0;
+    char _symbol = ' ';
+
+    int invert_Shot = 0;
+    
+    Player* _playerPtr;
+    bool _shoot_Flag = false;
+    bool _progressing = false;
+    char _direction = ' ';
+    
+    int _y_Plus = 0;
+    int _y_Negation = 0;
+    int _x = 0;
+    int _y = 0;
+    bool _destroy = false;
+
+    
+
+    Bullet(char symbol, Player* playerPtr, EnemyMonster* monsterPtr, bool shoot_Flag, char* inputChar, bool& destroy, int bulletId) : _symbol(symbol), _playerPtr(playerPtr), _shoot_Flag(shoot_Flag), _destroy(destroy), _bulletId(bulletId) {
+        
+    }
+
+private:
+
+
+
+};
+
+typedef map<int, Bullet*> BulletUnitMap;
+
+void Move(Player* playerPtr, char array[12][53], char* inputChar) {
+    int x = 0;
+    int y = 0;
+
+    x = playerPtr->GetCoordinates().xCoordinate;
+    y = playerPtr->GetCoordinates().yCoordinate;
+
+    int x_negated = x - 1;
+    int y_negated = y - 1;
+    int y_plus = y + 1;
+    int x_plus = x + 1;
+
+
+    if (playerPtr != NULL) {
+        switch (*inputChar) {
+
+        case 'w':
+            if (array[x_negated][y] == '.') {
+                array[x][y] = '.';
+                array[x_negated][y] = '@';
+            }
+            break;
+        case 'a':
+            if (array[x][y_negated] == '.') {
+                array[x][y] = '.';
+                array[x][y_negated] = '@';
+            }
+            break;
+        case 'd':
+            if (array[x][y_plus] == '.') {
+                array[x][y] = '.';
+                array[x][y_plus] = '@';
+            }
+            break;
+        case 's':
+            if (array[x_plus][y] == '.') {
+                array[x][y] = '.';
+                array[x_plus][y] = '@';
+            }
+            break;
+        }
+    }
+}
+
+void PrintMapArray(char array[12][53]) {
+    for (int i = 0; i < 12; i++) {
+        for (int j = 0; j < 53; j++) {
+            cout << array[i][j];
+        }
+        cout << endl;
+    }
+
+}
+bool FindBullet(char array[12][53]) {
+    int count = 0;
+    for (int i = 0; i < 12; i++) {
+        for (int j = 0; j < 53; j++) {
+            if (array[i][j] == 'o') {
+                ++count;
+
+            }
+
+        }
+
+    }
+    if (count == 0) {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+void addDroneMonster(int droneId, DroneMonster* unitPtr, DroneMonsterUnitMap& unitMap) {
+    unitMap[droneId] = unitPtr;
+
+
+}
+
+void MoveDirectionAi(EnemyMonster* monster, char mapArray[12][53], int direction_X, int  direction_Y, char setCoordinate, int yOrX) {
+    int setCoordinateDirection = 0;
+    DroneMonster* monster2 = static_cast<DroneMonster*>(monster);
+    if (yOrX == 0){
+        setCoordinateDirection = direction_X;
+    }
+    if (yOrX == 1) {
+        setCoordinateDirection = direction_Y;
+    }
+
+    if (monster2->moveCounterAi < monster2->moveLengthGen) {
+        if (mapArray[direction_X][direction_Y] != '#' && mapArray[direction_X][direction_Y] != '@') {
+            mapArray[direction_X][direction_Y] = '$';
+
+            mapArray[monster2->GetCoordinates().xCoordinate][monster2->GetCoordinates().yCoordinate] = '.';
+
+            monster2->SetCoordinates(setCoordinate, setCoordinateDirection, 0);
+            ++monster2->moveCounterAi;
+
+        }
+        if (mapArray[direction_X][direction_Y] == '#') {
+            monster2->moveCycle = false;
+            monster2->moveLengthGen = 0;
+            monster2->moveDirectionGen = 0;
+            monster2->moveCounterAi = 0;
+        }
+
+
+    }
+    if (monster2->moveCounterAi >= monster2->moveLengthGen) {
+        monster2->moveCycle = false;
+        monster2->moveLengthGen = 0;
+        monster2->moveDirectionGen = 0;
+        monster2->moveCounterAi = 0;
+    }
+
+}
+
+
+Player* MoveAi(DroneMonsterUnitMap& unitMap, char mapArray[12][53], Player* playerPtr) {
+    for (auto& pair : unitMap) {
+
+        // Y PLUS
+        pair.second->SetCoordinates('y', pair.second->GetCoordinates().yCoordinate, 1);
+
+        // X PLUS
+        pair.second->SetCoordinates('x', pair.second->GetCoordinates().xCoordinate, 1);
+
+        // Y NEGATION
+        pair.second->SetCoordinates('y', pair.second->GetCoordinates().yCoordinate, 2);
+
+        // X NEGATION
+        pair.second->SetCoordinates('x', pair.second->GetCoordinates().xCoordinate, 2);
+
+       
+        
+        
+        if (pair.second->moveCycle == false) {
+            int M = 4;
+            int N = 7;
+            pair.second->moveDirectionGen = rand() / (RAND_MAX / M + 1) + 1;
+            pair.second->moveLengthGen = rand() / (RAND_MAX / N + 1) + 1;
+            pair.second->moveCycle = true;
+        }
+        int x = 0;
+        int y = 0;
+        int x1 = 0;
+        int y1 = 0;
+        int x2 = 0;
+        int y2 = 0;
+        int x3 = 0;
+        int y3 = 0;
+
+
+       switch (pair.second->moveDirectionGen) {
+
+       case 1:
+           // RIGHT
+           x = pair.second->GetCoordinates().xCoordinate;
+           y = pair.second->GetCoordinates()._y_Plus;
+           
+           MoveDirectionAi(pair.second, mapArray, x, y, 'y', 1);
+         
+           break;
+       case 2:
+           // LEFT
+
+           x1 = pair.second->GetCoordinates().xCoordinate;
+           y1 = pair.second->GetCoordinates()._y_Negation;
+
+           MoveDirectionAi(pair.second, mapArray, x1, y1, 'y', 1);
+
+           break;
+       case 3:
+           //DOWN
+
+           x2 = pair.second->GetCoordinates()._x_Plus;
+           y2= pair.second->GetCoordinates().yCoordinate;
+
+           MoveDirectionAi(pair.second, mapArray, x2, y2, 'x', 0);
+
+           break;
+       case 4:
+           //UP
+
+           x3 = pair.second->GetCoordinates()._x_Negation;
+           y3 = pair.second->GetCoordinates().yCoordinate;
+
+           MoveDirectionAi(pair.second, mapArray, x3, y3, 'x', 0);
+          
+           break;
+
+     
+       }
+ 
+    }
+    return playerPtr;
+}
+
+
+
+
+
+
+void addBulletUnit(int bulletUnitId, Bullet* bulletPtr, BulletUnitMap& unitMap) {
+    unitMap[bulletUnitId] = bulletPtr;
+}
+
+Player* BulletAi(Player* playerPtr, BulletUnitMap& monsterBulletUnitMap, BulletUnitMap& playerBulletUnitMap, DroneMonsterUnitMap& unitMap, char mapArray[12][53], char* inputChar, bool destroy, int& bulletUnitId, int& bulletCount, steady_clock::time_point& lastTime, duration<double> interval ) {
+    
+
+    auto now = steady_clock::now();
+    auto elapsed = now - lastTime;
+    for (auto& pair : unitMap) {
+
+        int result = playerPtr->GetCoordinates().yCoordinate - pair.second->GetCoordinates().yCoordinate;
+        int invert = 0;
+
+        if (result < 0) {
+            result = (result * -1);
+            invert = 1;
+            
+        }
+        //HANDLES FIRING
+        if (result <= 15) {
+            if (elapsed >= interval) {
+                ++bulletCount;
+                ++bulletUnitId;
+                DroneMonster* droneMonsterPtr;
+                droneMonsterPtr = static_cast<DroneMonster*>(pair.second);
+
+                addBulletUnit(bulletUnitId, new Bullet(droneMonsterPtr->weapon, NULL, pair.second, FALSE, inputChar, destroy, bulletUnitId), monsterBulletUnitMap);
+
+
+
+                if (monsterBulletUnitMap[bulletUnitId]->_progressing == false && monsterBulletUnitMap[bulletUnitId] != NULL) {
+                    monsterBulletUnitMap[bulletUnitId]->_x = pair.second->GetCoordinates().xCoordinate;
+                    monsterBulletUnitMap[bulletUnitId]->_y = pair.second->GetCoordinates().yCoordinate;
+                    monsterBulletUnitMap[bulletUnitId]->_progressing = true;
+                    monsterBulletUnitMap[bulletUnitId]->invert_Shot = invert;
+
+                    lastTime = now;
+                }
+            }
+        }
+    }
+
+            //HANDLES MOVING
+    if (!monsterBulletUnitMap.empty()) {
+        for (auto& pair : monsterBulletUnitMap) {
+            if (pair.second->_progressing == true) {
+
+                pair.second->_y_Plus = pair.second->_y + 1;
+                pair.second->_y_Negation = pair.second->_y - 1;
+
+                //projectile movement left
+                if (pair.second->invert_Shot == 1 && mapArray[pair.second->_x][pair.second->_y_Negation] != '#' && mapArray[pair.second->_x][pair.second->_y_Negation] != '@') {
+                    mapArray[pair.second->_x][pair.second->_y_Negation] = 'o';
+
+                    if (mapArray[pair.second->_x][pair.second->_y] != '$') {
+                        mapArray[pair.second->_x][pair.second->_y] = '.';
+
+                    }
+
+                    pair.second->_y = pair.second->_y - 1;
+                }
+
+                //Projectile movement right
+                if (pair.second->invert_Shot == 0 && mapArray[pair.second->_x][pair.second->_y_Plus] != '#' && mapArray[pair.second->_x][pair.second->_y_Plus] != '@') {
+                    mapArray[pair.second->_x][pair.second->_y_Plus] = 'o';
+
+                    if (mapArray[pair.second->_x][pair.second->_y] != '$') {
+                        mapArray[pair.second->_x][pair.second->_y] = '.';
+
+                    }
+
+                    pair.second->_y = pair.second->_y + 1;
+                }
+
+                //Hit Wall Left side
+                if (pair.second->invert_Shot == 1 && mapArray[pair.second->_x][pair.second->_y_Negation] == '#') {
+                    mapArray[pair.second->_x][pair.second->_y] = '.';
+
+                    pair.second->_progressing = false;
+
+                    pair.second->_destroy = true;
+
+
+
+                }
+                //Hit Wall Right side
+                if (pair.second->invert_Shot == 0 && mapArray[pair.second->_x][pair.second->_y_Plus] == '#') {
+                    mapArray[pair.second->_x][pair.second->_y] = '.';
+
+                    pair.second->_progressing = false;
+
+                    pair.second->_destroy = true;
+
+
+
+                }
+
+                //player hit Left side
+                if (pair.second->invert_Shot == 1 && mapArray[pair.second->_x][pair.second->_y_Negation] == '@') {
+                    if (mapArray[pair.second->_x][pair.second->_y] != '$') {
+                        mapArray[pair.second->_x][pair.second->_y] = '.';
+                    }
+
+                    pair.second->_progressing = false;
+
+                    pair.second->_destroy = true;
+
+
+                    if (playerPtr->GetCoordinates().xCoordinate == pair.second->_x && playerPtr->GetCoordinates().yCoordinate == pair.second->_y_Negation) {
+                        playerPtr->health = playerPtr->health - 50;
+                        if (playerPtr->health == 0) {
+                            mapArray[pair.second->_x][pair.second->_y_Negation] = '.';
+                            
+
+                            pair.second->_progressing = false;
+
+                            pair.second->_destroy = true;
+
+                            delete playerPtr;
+                            playerPtr = NULL;
+                            return playerPtr;
+
+                            
+                        }
+                    }
+                }
+
+                //player hit Right side
+                if (pair.second->invert_Shot == 0 && mapArray[pair.second->_x][pair.second->_y_Plus] == '@') {
+                    if (mapArray[pair.second->_x][pair.second->_y] != '$') {
+                        mapArray[pair.second->_x][pair.second->_y] = '.';
+                    }
+
+                    pair.second->_progressing = false;
+
+
+                    pair.second->_destroy = true;
+
+                    if (playerPtr->GetCoordinates().xCoordinate == pair.second->_x && playerPtr->GetCoordinates().yCoordinate == pair.second->_y_Plus) {
+                        playerPtr->health = playerPtr->health - 50;
+                        if (playerPtr->health == 0) {
+                            mapArray[pair.second->_x][pair.second->_y_Plus] = '.';
+                           
+
+                            pair.second->_progressing = false;
+
+                            pair.second->_destroy = true;
+                            delete playerPtr;
+                            playerPtr = NULL;
+                            return playerPtr;
+
+                            
+                        }
+                    }
+                }
+            }
+
+        }
+
+    }
+     
+    return playerPtr;
+    
+}
+
+void ClearPointers(DroneMonsterUnitMap& unitMap, BulletUnitMap& playerBulletUnitMap, BulletUnitMap& monsterBulletUnitMap) {
+
+    for (auto& pair : unitMap) {
+        delete pair.second;
+    }
+    for (auto& pair : playerBulletUnitMap) {
+        delete pair.second;
+    }
+    for (auto& pair : monsterBulletUnitMap) {
+        delete pair.second;
+    }
+    
+}
+
+void BulletDelete(BulletUnitMap& unitMap, bool& erase, int& bulletId) {
+    for (auto& pair : unitMap) {
+        if (!unitMap.empty()) {
+            if (pair.second->_destroy == true) {
+
+
+                bulletId = pair.second->_bulletId;
+                delete pair.second;
+                pair.second = nullptr;
+                erase = true;
+
+                cout << "ERASED" << endl;
+                break;
+
+            }
+        }
+    }
+    if (erase == true) {
+        unitMap.erase(bulletId);
+    }
+}
+void MoveBullet(Player* playerPtr, Bullet* bulletPtr, DroneMonsterUnitMap& unitMap, char mapArray[12][53], char *inputChar) {
+    if (bulletPtr->_shoot_Flag == true) {
+
+        if (bulletPtr->_progressing == false) {
+            bulletPtr->_direction = *inputChar;
+            *inputChar = ' ';
+        }
+        if (bulletPtr->_progressing == false) {
+            bulletPtr->_x = playerPtr->GetCoordinates().xCoordinate;
+            bulletPtr->_y = playerPtr->GetCoordinates().yCoordinate;
+            bulletPtr->_progressing = true;
+        }
+        
+
+        bulletPtr->_y_Plus = bulletPtr->_y + 1;
+        bulletPtr->_y_Negation = bulletPtr->_y - 1;
+
+        if (bulletPtr->_direction == 'e' && mapArray[bulletPtr->_x][bulletPtr->_y_Plus] != '#' && mapArray[bulletPtr->_x][bulletPtr->_y_Plus] != '$') {
+            mapArray[bulletPtr->_x][bulletPtr->_y_Plus] = 'o';
+            if (mapArray[bulletPtr->_x][bulletPtr->_y] != '@') {
+                mapArray[bulletPtr->_x][bulletPtr->_y] = '.';
+            }
+            bulletPtr->_y = bulletPtr->_y + 1;
+
+
+        }
+        if (bulletPtr->_direction == 'q' && mapArray[bulletPtr->_x][bulletPtr->_y_Negation] != '#' && mapArray[bulletPtr->_x][bulletPtr->_y_Negation] != '$') {
+
+            mapArray[bulletPtr->_x][bulletPtr->_y_Negation] = 'o';
+
+            if (mapArray[bulletPtr->_x][bulletPtr->_y] != '@') {
+                mapArray[bulletPtr->_x][bulletPtr->_y] = '.';
+
+            }
+            bulletPtr->_y = bulletPtr->_y - 1;
+        }
+        if (bulletPtr->_direction == 'q' && mapArray[bulletPtr->_x][bulletPtr->_y_Negation] == '#') {
+            mapArray[bulletPtr->_x][bulletPtr->_y] = '.';
+            bulletPtr->_shoot_Flag = false;
+            bulletPtr->_progressing = false;
+            
+            bulletPtr->_destroy = true;
+            cout << bulletPtr->_bulletId;
+
+
+        }
+        if (bulletPtr->_direction == 'e' && mapArray[bulletPtr->_x][bulletPtr->_y_Plus] == '#') {
+            mapArray[bulletPtr->_x][bulletPtr->_y] = '.';
+            bulletPtr->_shoot_Flag = false;
+            bulletPtr->_progressing = false;
+            
+            bulletPtr->_destroy = true;
+            cout << bulletPtr->_bulletId;
+
+        }
+        if (bulletPtr->_direction == 'q' && mapArray[bulletPtr->_x][bulletPtr->_y_Negation] == '$') {
+            if (mapArray[bulletPtr->_x][bulletPtr->_y] != '$') {
+                mapArray[bulletPtr->_x][bulletPtr->_y] = '.';
+            }
+            bulletPtr->_shoot_Flag = false;
+            bulletPtr->_progressing = false;
+            bool erase = false;
+            int monsterId;
+            for (auto& pair : unitMap) {
+                if (pair.second->GetCoordinates().xCoordinate == bulletPtr->_x && pair.second->GetCoordinates().yCoordinate == bulletPtr->_y_Negation) {
+                    pair.second->health = pair.second->health - 50;
+                    if (pair.second->health == 0) {
+                        mapArray[bulletPtr->_x][bulletPtr->_y_Negation] = '.';
+                        DroneMonster* dMonsterPtr = static_cast<DroneMonster*>(pair.second);
+                        monsterId = dMonsterPtr->_monsterId;
+                        delete pair.second;
+                        pair.second = nullptr;
+                        erase = true;
+                        break;
+                    }
+                }
+            }
+
+            bulletPtr->_destroy = true;
+            cout << bulletPtr->_bulletId;
+
+            if (erase == true) {
+                unitMap.erase(monsterId);
+            }
+        }
+
+        if (bulletPtr->_direction == 'e' && mapArray[bulletPtr->_x][bulletPtr->_y_Plus] == '$') {
+
+            if (mapArray[bulletPtr->_x][bulletPtr->_y] != '$') {
+                mapArray[bulletPtr->_x][bulletPtr->_y] = '.';
+            }
+            int i = 0;
+            while (i < 10) { ++i; cout << "FLAG" << endl; }
+            
+            mapArray[bulletPtr->_x][bulletPtr->_y] = '.';
+            bulletPtr->_shoot_Flag = false;
+            bulletPtr->_progressing = false;
+            bool erase = false;
+            int monsterId;
+            for (auto& pair : unitMap) {
+                if (pair.second->GetCoordinates().xCoordinate == bulletPtr->_x && pair.second->GetCoordinates().yCoordinate == bulletPtr->_y_Plus) {
+                    pair.second->health = pair.second->health - 50;
+                    if (pair.second->health == 0) {
+
+                        mapArray[bulletPtr->_x][bulletPtr->_y_Plus] = '.';
+                        DroneMonster* dMonsterPtr = static_cast<DroneMonster*>(pair.second);
+                        monsterId = dMonsterPtr->_monsterId;
+                        delete pair.second;
+                        pair.second = nullptr;
+                        erase = true;
+                        break;
+                    }
+                }
+            }
+
+            bulletPtr->_destroy = true;
+            cout << bulletPtr->_bulletId;
+
+            if (erase == true) {
+                unitMap.erase(monsterId);
+            }
+        }
+
+    }
+}
+
+
+void clearConsole() {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    DWORD consoleSize;
+    DWORD charsWritten;
+    COORD topLeft = { 0, 0 };
+    GetConsoleScreenBufferInfo(hConsole, &csbi);
+    consoleSize = csbi.dwSize.X * csbi.dwSize.Y;
+
+    FillConsoleOutputCharacter(hConsole, ' ', consoleSize, topLeft, &charsWritten);
+
+    FillConsoleOutputAttribute(hConsole, csbi.wAttributes, consoleSize, topLeft, &charsWritten);
+
+    SetConsoleCursorPosition(hConsole, topLeft);
+}
+
+int main()
+{
+
+    using namespace std::chrono;
+
+    char buffer[637];
+
+    ifstream infile("C:\\Users\\brand\\Documents\\Visual Studio 2022\\Projects\\ConsoleGame\\ConsoleGame\\x64\\Debug\\Level.txt");
+
+    char ch;
+    int index = 0;
+    buffer[636] = '\0';
+    while (infile.get(ch) && index < 636) {
+        if (ch != '\n' && ch != '\r') {
+            buffer[index++] = ch;
+        }
+    }
+
+    char mapArray[12][53];
+    int index2 = 0;
+    for (int i = 0; i < 12; i++) {
+        for (int j = 0; j < 53; j++) {
+            mapArray[i][j] = buffer[index2++];
+        }
+    }
+    
+    PrintMapArray(mapArray);
+
+    bool breakFlag = false;
+
+    Player* playerPtr = new Player(150);
+    playerPtr->FindLocation(mapArray);
+    int droneMonsterUnitId = 0;
+    int droneMonsterCount = 0;
+    //Drone Monster Collection
+    DroneMonsterUnitMap droneMonsterUnitMap;
+
+    //Player Bullet Collection
+    BulletUnitMap bulletUnitMap;
+
+    //Monster Bullet Collection
+    BulletUnitMap monsterBulletUnitMap;
+
+    
+    char unitSymbols[] = { '$', '&' };
+    for (auto& unit : unitSymbols) {
+        for (int i = 0; i < 12; i++) {
+            for (int j = 0; j < 53; j++) {
+
+                if (mapArray[i][j] == unit) {
+                    
+                    if (unit == '$') {
+                        ++droneMonsterCount;
+                        ++droneMonsterUnitId;
+                       
+                        addDroneMonster(droneMonsterUnitId, new DroneMonster(droneMonsterUnitId), droneMonsterUnitMap);
+                        
+                        droneMonsterUnitMap[droneMonsterUnitId]->SetCoordinates('x', i, 0);
+                        droneMonsterUnitMap[droneMonsterUnitId]->SetCoordinates('y', j, 0);
+                        
+                    }
+                    if (unit == '&') {
+
+                    }
+                }
+               
+            }
+            if (breakFlag == true) {
+                break;
+            }
+        }
+    }
+   //GameLoop
+     auto lastTime_GameLoop = steady_clock::now();
+    const auto interval_GameLoop = duration<double>(0.10);
+    //MoveLoop
+   auto lastTime_MoveLoop = steady_clock::now();
+    const auto interval_MoveLoop = duration<double>(0.1);
+
+
+    //Monster Projectile Loop
+    auto lastTime_MonsterProjectileLoop = steady_clock::now();
+    const auto interval_MonsterProjectileLoop = duration<double>(0.10);
+
+    //Monster Bullet Number Loop
+    auto lastTime_MonsterShotLoop = steady_clock::now();
+    const auto interval_MonsterShotLoop = duration<double>(.50);
+    //-----------------------------------Player Actions ----------------
+    char* myChar = new char();
+    bool shoot_Flag = false;
+    char direction;
+
+    //Bullet stuff
+    int bulletCount = 0;
+    int bulletUnitId = 0;
+    bool newInput = false;
+    //Protectile Loop Global variables (Relative to game loop)
+    int x;
+    int y;
+    bool progressing = false;
+    bool destroy = false;
+    //-----------------------------------Monster Actions ----------------
+
+    bool monster_Shoot_Flag = false;
+    char monster_Direction;
+
+    //Bullet stuff
+    int monster_BulletCount = 0;
+    int monster_BulletUnitId = 0;
+    bool monster_NewInput = false;
+
+    //Protectile Loop Global variables (Relative to game loop)
+    int monster_X;
+    int monster_Y;
+    bool monster_Progressing = false;
+    bool monster_Destroy = false;
+
+    while (true) {
+
+        //Game Loop
+        auto now_GameLoop = steady_clock::now();
+        duration<double> elapsed_GameLoop = now_GameLoop - lastTime_GameLoop;
+        //Move Loop
+        auto now_MoveLoop = steady_clock::now();
+        duration<double> elapsed_MoveLoop = now_MoveLoop - lastTime_MoveLoop;
+
+        //Monster Projectile Loop
+        auto now_MonsterProjectileLoop = steady_clock::now();
+        duration<double> elapsed_MonsterProjectileLoop = now_MonsterProjectileLoop - lastTime_MonsterProjectileLoop;
+
+        //Monster Shoot Number Loop
+        auto now_MonsterShotLoop = steady_clock::now();
+        duration<double> elapsed_MonsterShotLoop = now_MonsterShotLoop - lastTime_MonsterShotLoop;
+        
+
+        //Game Loop Update
+        if (elapsed_GameLoop >= interval_GameLoop) {
+            clearConsole();
+            lastTime_GameLoop = now_GameLoop;
+            PrintMapArray(mapArray);
+
+        }
+        //Player Move Loop
+
+        if (elapsed_MoveLoop >= interval_MoveLoop) {
+
+
+            if (_kbhit()) {
+                
+                *myChar = _getch();
+                if (*myChar == 'e' || *myChar == 'q') {
+                    newInput = true;
+                }
+            }
+            if (*myChar == 'w' || *myChar == 'a' || *myChar == 'd' || *myChar == 's') {
+                Move(playerPtr, mapArray, myChar);
+            }
+
+            playerPtr->FindLocation(mapArray);
+            if (*myChar != 'e' && *myChar != 'q') {
+                *myChar = ' ';
+            }
+
+            playerPtr = MoveAi(droneMonsterUnitMap, mapArray, playerPtr);
+            if (playerPtr == NULL) {
+                ClearPointers(droneMonsterUnitMap, bulletUnitMap, monsterBulletUnitMap);
+                break;
+
+            }
+
+            lastTime_MoveLoop = now_MoveLoop;
+        }
+        
+        
+            if (*myChar == 'e' || *myChar == 'q') {
+                shoot_Flag = playerPtr->Shoot(myChar);
+
+            }
+      
+        // Projectile Speed
+      
+           if (shoot_Flag == true) {
+
+               if (newInput == true) {
+                   ++bulletCount;
+                   ++bulletUnitId;
+                   addBulletUnit(bulletUnitId, new Bullet(playerPtr->weapon, playerPtr, NULL, shoot_Flag, myChar, destroy, bulletUnitId), bulletUnitMap);
+                   newInput = false;
+               }
+           }
+               if (!bulletUnitMap.empty()) {
+                   for (auto& pair : bulletUnitMap) {
+                       
+                       MoveBullet(playerPtr, pair.second, droneMonsterUnitMap, mapArray, myChar);
+                       
+                   }
+               }
+               if (!FindBullet(mapArray)) {
+                   shoot_Flag = false;
+               }
+               //-----------------------------------------------------
+               //player bullet delete
+               bool erase = false;
+               int bulletId = 0;
+            
+             BulletDelete(bulletUnitMap, erase, bulletId);
+
+            playerPtr = BulletAi(playerPtr, monsterBulletUnitMap, bulletUnitMap, droneMonsterUnitMap, mapArray, NULL, monster_Destroy, monster_BulletUnitId, monster_BulletCount, lastTime_MonsterShotLoop, interval_MonsterShotLoop);
+             if (playerPtr != NULL) {
+                 cout << "PLAYER HEALTH: " << playerPtr->health << endl;
+                 cout << "PLAYER WEAPON: " << playerPtr->weapon << endl;
+             }
+            //----------------------------------------------------- 
+             //Monster bullet delete
+             bool monster1_Erase = false;
+             int monster1_BulletId = 0;
+             BulletDelete(monsterBulletUnitMap, monster1_Erase, monster1_BulletId);
+
+            
+             if (playerPtr == NULL) {
+                 ClearPointers(droneMonsterUnitMap, bulletUnitMap, monsterBulletUnitMap);
+
+                 break;
+
+             }
+         
+        
+        std::this_thread::sleep_for(milliseconds(1));
+        
+
+    }
+}
+
+
