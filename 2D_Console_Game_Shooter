@@ -12,6 +12,7 @@
 using namespace std;
 using namespace std::chrono;
 
+
 struct Coordinates {
 
     int xCoordinate = 0;
@@ -22,7 +23,53 @@ struct Coordinates {
     int _x_Negation = 0;
     
 };
+class Player {
+public:
+    int health;
 
+    bool Shoot(char* inputChar);
+    void SetCoordinates(int x, int y);
+
+    char weapon = 'o';
+
+
+    Coordinates cd;
+    Coordinates GetCoordinates();
+    Player(int health) {
+        this->health = health;
+    }
+    void FindLocation(char array[12][53]);
+private:
+
+};
+
+
+void Player::SetCoordinates(int x, int y) {
+
+    cd.xCoordinate = x;
+    cd.yCoordinate = y;
+
+
+}
+
+Coordinates Player::GetCoordinates() {
+    return this->cd;
+}
+
+void Player::FindLocation(char array[12][53]) {
+    bool breakFlag = false;
+    for (int i = 0; i < 12; i++) {
+        for (int j = 0; j < 53; j++) {
+            if (array[i][j] == '@') {
+                cd.xCoordinate = i;
+                cd.yCoordinate = j;
+
+            }
+
+        }
+
+    }
+}
 
 class EnemyMonster {
     
@@ -43,19 +90,22 @@ public:
     Coordinates cd;
     Coordinates GetCoordinates();
 
-
+    virtual Player* MainMoveAi(char mapArray[12][53],Player* playerPtr);
 
    
 protected:
 
-     virtual int TestFunction() { return 0; };
+    
 
 private:
  
     
 
 };
+ Player* EnemyMonster::MainMoveAi(char mapArray[12][53], Player* playerPtr) {
+    return playerPtr;
 
+}
 
 void EnemyMonster::SetCoordinates(char input, int setting, int mode) {
 
@@ -96,72 +146,133 @@ public:
     
     char weapon = 'o';
     
+    
     DroneMonster(int monsterId) : _monsterId(monsterId) {
 
     }
 
     
 
-    int TestFunction() override {
-
-        return 0;
+    Player* MainMoveAi(char mapArray[12][53], Player* playerPtr) override {
+        
+        MoveAi(mapArray, playerPtr);
+        return playerPtr;
     };
   
 
 private:
-
+    void MoveDirectionAi(char mapArray[12][53], int direction_X, int  direction_Y, char setCoordinate, int yOrX);
+    Player* MoveAi( char mapArray[12][53], Player* playerPtr);
 };
 
 
 
 typedef map<int, EnemyMonster*> DroneMonsterUnitMap;
 
-class Player {
-public:
-    int health;
-    
-    bool Shoot(char* inputChar);
-    void SetCoordinates(int x, int y);
- 
-    char weapon = 'o';
-    
-    
-    Coordinates cd;
-    Coordinates GetCoordinates();
-    Player(int health) {
-        this->health = health;
-    }
-    void FindLocation(char array[12][53]);
-private:
+
+Player* DroneMonster::MoveAi(char mapArray[12][53], Player* playerPtr) {
   
-};
 
 
-void Player::SetCoordinates(int x, int y) {
-
-    cd.xCoordinate = x;
-    cd.yCoordinate = y;
 
 
-}
-
-Coordinates Player::GetCoordinates() {
-    return this->cd;
-}
-
-void Player::FindLocation(char array[12][53]) {
-    bool breakFlag = false;
-    for (int i = 0; i < 12; i++) {
-        for (int j = 0; j < 53; j++) {
-            if (array[i][j] == '@') {
-                cd.xCoordinate = i;
-                cd.yCoordinate = j;
-                
-            }
-           
-        }
-     
+    if (this->moveCycle == false) {
+        int M = 4;
+        int N = 7;
+        this->moveDirectionGen = rand() / (RAND_MAX / M + 1) + 1;
+        this->moveLengthGen = rand() / (RAND_MAX / N + 1) + 1;
+        this->moveCycle = true;
     }
+    int x = 0;
+    int y = 0;
+    int x1 = 0;
+    int y1 = 0;
+    int x2 = 0;
+    int y2 = 0;
+    int x3 = 0;
+    int y3 = 0;
+
+
+    switch (this->moveDirectionGen) {
+
+    case 1:
+        // RIGHT
+        x = this->GetCoordinates().xCoordinate;
+        y = this->GetCoordinates()._y_Plus;
+
+        this->MoveDirectionAi(mapArray, x, y, 'y', 1);
+
+        break;
+    case 2:
+        // LEFT
+
+        x1 = this->GetCoordinates().xCoordinate;
+        y1 = this->GetCoordinates()._y_Negation;
+
+        this->MoveDirectionAi(mapArray, x1, y1, 'y', 1);
+
+        break;
+    case 3:
+        //DOWN
+
+        x2 = this->GetCoordinates()._x_Plus;
+        y2 = this->GetCoordinates().yCoordinate;
+
+        this->MoveDirectionAi(mapArray, x2, y2, 'x', 0);
+
+        break;
+    case 4:
+        //UP
+
+        x3 = this->GetCoordinates()._x_Negation;
+        y3 = this->GetCoordinates().yCoordinate;
+
+        this->MoveDirectionAi(mapArray, x3, y3, 'x', 0);
+
+        break;
+
+
+    }
+    return playerPtr;
+}
+
+   
+void DroneMonster::MoveDirectionAi(char mapArray[12][53], int direction_X, int  direction_Y, char setCoordinate, int yOrX) {
+    int setCoordinateDirection = 0;
+    DroneMonster* monster2 = this;
+    if (yOrX == 0) {
+        setCoordinateDirection = direction_X;
+    }
+    if (yOrX == 1) {
+        setCoordinateDirection = direction_Y;
+    }
+
+    if (monster2->moveCounterAi < monster2->moveLengthGen) {
+        if (mapArray[direction_X][direction_Y] != '#' && mapArray[direction_X][direction_Y] != '@') {
+            mapArray[direction_X][direction_Y] = '$';
+
+            mapArray[monster2->GetCoordinates().xCoordinate][monster2->GetCoordinates().yCoordinate] = '.';
+
+            monster2->SetCoordinates(setCoordinate, setCoordinateDirection, 0);
+            ++monster2->moveCounterAi;
+
+        }
+        if (mapArray[direction_X][direction_Y] == '#') {
+            monster2->moveCycle = false;
+            monster2->moveLengthGen = 0;
+            monster2->moveDirectionGen = 0;
+            monster2->moveCounterAi = 0;
+        }
+
+
+    }
+    if (monster2->moveCounterAi >= monster2->moveLengthGen) {
+        monster2->moveCycle = false;
+        monster2->moveLengthGen = 0;
+        monster2->moveDirectionGen = 0;
+        monster2->moveCounterAi = 0;
+    }
+
 }
 
 bool Player::Shoot(char* inputChar){
@@ -283,127 +394,6 @@ void addDroneMonster(int droneId, DroneMonster* unitPtr, DroneMonsterUnitMap& un
 
 
 }
-
-void MoveDirectionAi(EnemyMonster* monster, char mapArray[12][53], int direction_X, int  direction_Y, char setCoordinate, int yOrX) {
-    int setCoordinateDirection = 0;
-    DroneMonster* monster2 = static_cast<DroneMonster*>(monster);
-    if (yOrX == 0){
-        setCoordinateDirection = direction_X;
-    }
-    if (yOrX == 1) {
-        setCoordinateDirection = direction_Y;
-    }
-
-    if (monster2->moveCounterAi < monster2->moveLengthGen) {
-        if (mapArray[direction_X][direction_Y] != '#' && mapArray[direction_X][direction_Y] != '@') {
-            mapArray[direction_X][direction_Y] = '$';
-
-            mapArray[monster2->GetCoordinates().xCoordinate][monster2->GetCoordinates().yCoordinate] = '.';
-
-            monster2->SetCoordinates(setCoordinate, setCoordinateDirection, 0);
-            ++monster2->moveCounterAi;
-
-        }
-        if (mapArray[direction_X][direction_Y] == '#') {
-            monster2->moveCycle = false;
-            monster2->moveLengthGen = 0;
-            monster2->moveDirectionGen = 0;
-            monster2->moveCounterAi = 0;
-        }
-
-
-    }
-    if (monster2->moveCounterAi >= monster2->moveLengthGen) {
-        monster2->moveCycle = false;
-        monster2->moveLengthGen = 0;
-        monster2->moveDirectionGen = 0;
-        monster2->moveCounterAi = 0;
-    }
-
-}
-
-
-Player* MoveAi(DroneMonsterUnitMap& unitMap, char mapArray[12][53], Player* playerPtr) {
-    for (auto& pair : unitMap) {
-
-        // Y PLUS
-        pair.second->SetCoordinates('y', pair.second->GetCoordinates().yCoordinate, 1);
-
-        // X PLUS
-        pair.second->SetCoordinates('x', pair.second->GetCoordinates().xCoordinate, 1);
-
-        // Y NEGATION
-        pair.second->SetCoordinates('y', pair.second->GetCoordinates().yCoordinate, 2);
-
-        // X NEGATION
-        pair.second->SetCoordinates('x', pair.second->GetCoordinates().xCoordinate, 2);
-
-       
-        
-        
-        if (pair.second->moveCycle == false) {
-            int M = 4;
-            int N = 7;
-            pair.second->moveDirectionGen = rand() / (RAND_MAX / M + 1) + 1;
-            pair.second->moveLengthGen = rand() / (RAND_MAX / N + 1) + 1;
-            pair.second->moveCycle = true;
-        }
-        int x = 0;
-        int y = 0;
-        int x1 = 0;
-        int y1 = 0;
-        int x2 = 0;
-        int y2 = 0;
-        int x3 = 0;
-        int y3 = 0;
-
-
-       switch (pair.second->moveDirectionGen) {
-
-       case 1:
-           // RIGHT
-           x = pair.second->GetCoordinates().xCoordinate;
-           y = pair.second->GetCoordinates()._y_Plus;
-           
-           MoveDirectionAi(pair.second, mapArray, x, y, 'y', 1);
-         
-           break;
-       case 2:
-           // LEFT
-
-           x1 = pair.second->GetCoordinates().xCoordinate;
-           y1 = pair.second->GetCoordinates()._y_Negation;
-
-           MoveDirectionAi(pair.second, mapArray, x1, y1, 'y', 1);
-
-           break;
-       case 3:
-           //DOWN
-
-           x2 = pair.second->GetCoordinates()._x_Plus;
-           y2= pair.second->GetCoordinates().yCoordinate;
-
-           MoveDirectionAi(pair.second, mapArray, x2, y2, 'x', 0);
-
-           break;
-       case 4:
-           //UP
-
-           x3 = pair.second->GetCoordinates()._x_Negation;
-           y3 = pair.second->GetCoordinates().yCoordinate;
-
-           MoveDirectionAi(pair.second, mapArray, x3, y3, 'x', 0);
-          
-           break;
-
-     
-       }
- 
-    }
-    return playerPtr;
-}
-
-
 
 
 
@@ -915,7 +905,27 @@ int main()
                 *myChar = ' ';
             }
 
-            playerPtr = MoveAi(droneMonsterUnitMap, mapArray, playerPtr);
+            
+                for (auto& pair : droneMonsterUnitMap) {
+
+                    // Y PLUS
+                    pair.second->SetCoordinates('y', pair.second->GetCoordinates().yCoordinate, 1);
+
+                    // X PLUS
+                    pair.second->SetCoordinates('x', pair.second->GetCoordinates().xCoordinate, 1);
+
+                    // Y NEGATION
+                    pair.second->SetCoordinates('y', pair.second->GetCoordinates().yCoordinate, 2);
+
+                    // X NEGATION
+                    pair.second->SetCoordinates('x', pair.second->GetCoordinates().xCoordinate, 2);
+
+                    playerPtr = pair.second->MainMoveAi(mapArray, playerPtr);
+                }
+
+                    
+
+            
             if (playerPtr == NULL) {
                 ClearPointers(droneMonsterUnitMap, bulletUnitMap, monsterBulletUnitMap);
                 break;
@@ -985,8 +995,11 @@ int main()
     }
 }
 
+
+
+
 /*
-Map For Game below, place .txt in specified path (via code)
+Map For Game is below, place .txt in specified path (via code)
 
 #####################################################
 #...........#.......................................#
