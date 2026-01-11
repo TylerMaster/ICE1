@@ -1,0 +1,129 @@
+/***************************
+Where Is Poppy
+2024-06-04
+
+wip_camera.cpp
+
+Camera entity
+******************************/
+
+#include "wip_camera.h"
+
+class FuncSecurityCamera : public CBaseEntity
+{
+public:
+	void Spawn(void);
+	void Think() override;
+
+private:
+	CBaseEntity* FindIntruder();
+	bool IsVisible(CBaseEntity* potentialIntruder);
+	void Rotate(CBaseEntity* potentialIntruder);
+
+	CBaseEntity* intruder = nullptr;
+	
+	bool detected = false;
+	void KeyValue(KeyValueData *pkvd);
+	float m_flModelScale = 1.0f;
+};
+
+LINK_ENTITY_TO_CLASS(wip_Camera, FuncSecurityCamera);
+
+
+void FuncSecurityCamera::Spawn(){
+
+	PRECACHE_MODEL((char *)STRING(pev->model));
+
+	SET_MODEL(edict(), "models/camera/camera.mdl");
+	UTIL_SetOrigin(pev, pev->origin);
+	pev->solid = SOLID_NOT;
+	pev->movetype = MOVETYPE_NONE;
+	pev->scale = m_flModelScale;
+
+
+	pev->nextthink = gpGlobals->time + 1.5f;
+
+}
+
+
+void FuncSecurityCamera::Think()
+{
+	intruder = FindIntruder();
+
+	if (intruder && !detected)
+	{
+		detected = true;
+	}
+
+	Rotate(intruder);
+	pev->nextthink = gpGlobals->time + 0.016f;
+
+}
+
+CBaseEntity* FuncSecurityCamera::FindIntruder()
+{
+	CBaseEntity* potentialIntruder = nullptr;
+	while (potentialIntruder = UTIL_FindEntityInSphere(potentialIntruder, pev->origin, 512.0f))
+	{
+		if (!potentialIntruder->IsPlayer())
+		{
+			continue;
+		}
+
+		if (IsVisible(potentialIntruder))
+		{
+			return potentialIntruder;
+		}
+	}
+	return nullptr;
+}
+
+bool FuncSecurityCamera::IsVisible(CBaseEntity* potentialIntruder)
+{
+	Vector direction = (potentialIntruder->pev->origin - pev->origin).Normalize();
+
+
+	Vector forward;
+	UTIL_MakeVectorsPrivate(pev->angles, forward, nullptr, nullptr);
+
+	if (DotProduct(forward, direction) < 0.5f)
+	{
+		return false;
+	}
+
+	TraceResult tr;
+	UTIL_TraceLine(pev->origin, potentialIntruder->pev->origin, dont_ignore_monsters, edict(), &tr);
+
+	return tr.pHit == potentialIntruder->edict();
+}
+
+void FuncSecurityCamera::KeyValue(KeyValueData *pkvd) // function runs first in code
+{
+
+	if (FStrEq(pkvd->szKeyName, "modelscale"))
+	{
+		m_flModelScale = atof(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+
+}
+
+void FuncSecurityCamera::Rotate(CBaseEntity* potentialIntruder)
+{
+	/*TraceResult tr;
+	UTIL_TraceLine(pev->origin, potentialIntruder->pev->origin, dont_ignore_monsters, edict(), &tr);*/
+
+	
+	if (intruder)
+	{
+		Vector direction = (potentialIntruder->pev->origin - pev->origin).Normalize();
+		pev->angles.y = UTIL_VecToYaw(direction);
+		detected = false;
+		
+		
+	}
+	if (!intruder) {
+		pev->angles.y += 15.0f * gpGlobals->frametime;
+		
+	}
+}
